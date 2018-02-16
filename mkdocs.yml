@@ -1,10 +1,12 @@
 site_name: ICP content demos
 site_url: https://pages.github.ibm.com/watson-foundation-services/icp-content-demos/
-site_description: A set of demo apps to show how to leverage ICP design pattern to build contents
+site_description: daily practice questions on algorithm and system design quesitons
 theme: 'material'
-repo_name: 'icp-content-demos'
-repo_url: 'https://github.ibm.com/watson-foundation-services/icp-content-demos.git'
+repo_name: 'fundamentals'
+repo_url: 'https://github.com/SailC/fundamentals.git'
 extra:
-  logo: 'images/k8s.png'
+  logo: 'images/avatar.png'
   palette:
     primary: 'Cyan'
+markdown_extensions:
+  - codehilite

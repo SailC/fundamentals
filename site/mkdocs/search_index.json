@@ -2,73 +2,48 @@
     "docs": [
         {
             "location": "/", 
-            "text": "ICP content demos\n\n\nThis repo contains a set of demo apps to show how to leverage ICP design pattern to build application contents. For more information, please refer to \nICP Content Provider Playbook\n\n\nObjective\n\n\nKubernetes is enabling a new design patterns, similar to object oriented design patterns, but for containerized applications.\n\n\nThere are many publicly available sources for designing content to run on Kubernetes, and ICP platform offers additional design considerations.\n\n\nThe objective of this document to accelerate the on-boarding of product teams onto IBM Cloud Private (ICP) by providing some \nhello-world\n apps to demonstrate how to leverage the ICP content design pattern.\n\n\nDemo Lists\n\n\n\n\nLogging\n\n\nMetering\n\n\nMonitoring", 
+            "text": "ICP content demos\n\n\nThis repo contains a set of interview algorithm \n system design questions.\n\n\nObjective\n\n\n\n\nsort the questions in different categories and companies.\n\n\n\n\nDemo Lists\n\n\n\n\nLinkedin\n\n\nThumbtack\n\n\nFacebook\n\n\nGoogle", 
             "title": "Home"
         }, 
         {
             "location": "/#icp-content-demos", 
-            "text": "This repo contains a set of demo apps to show how to leverage ICP design pattern to build application contents. For more information, please refer to  ICP Content Provider Playbook", 
+            "text": "This repo contains a set of interview algorithm   system design questions.", 
             "title": "ICP content demos"
         }, 
         {
             "location": "/#objective", 
-            "text": "Kubernetes is enabling a new design patterns, similar to object oriented design patterns, but for containerized applications.  There are many publicly available sources for designing content to run on Kubernetes, and ICP platform offers additional design considerations.  The objective of this document to accelerate the on-boarding of product teams onto IBM Cloud Private (ICP) by providing some  hello-world  apps to demonstrate how to leverage the ICP content design pattern.", 
+            "text": "sort the questions in different categories and companies.", 
             "title": "Objective"
         }, 
         {
             "location": "/#demo-lists", 
-            "text": "Logging  Metering  Monitoring", 
+            "text": "Linkedin  Thumbtack  Facebook  Google", 
             "title": "Demo Lists"
         }, 
         {
-            "location": "/logging/", 
-            "text": "Logging demo\n\n\nThis demo explains how to leverage ICP's logging stack to ship your application logs with two examples. Please refer to \nICP content playbook\n for more info.\n\n\nThe related code is under \nicp-content-demos/logging-demo\n\n\nGetting started (Option 1: Automatic log collection)\n\n\n\n\nThe \nkubectl run\n line below will create a \nnginx\n \npods\n listening on port 80. It will also create a \ndeployment\n named \nmy-nginx\n to ensure that there are always two pods running.\n\n\n\n\nkubectl run my-nginx --image=nginx --replicas=1 --port=80\n\n\n\n\n\n\nThe nginx server ships the log directly to stdout/stderr\nTo see the logs, first you need to hit the nginx end point to generate logs.\n\n\n\n\nkubectl port-forward \nnginx-pod-name\n 8000:80\n\n\n\n\n\n\n\n\nOpen \nlocalhost:8000\n in your browser, and you can see the welcome page from nginx, a log entry will be generated at the same time.\n\n\n\n\n\n\nTo check the logs via Kibana, go to \nhttps://\nicp cluster ip\n:8443/kibana/\n and search for \nmy-nginx\n, you can see the log entries.\n\n\n\n\n\n\nLogging Data flow\n\n\nOption 1: Automatic log collection\n\n\n+-----+                      +---------------+                        +------------+\n| App |---(stdout/stderr)---\n| host log file |---(Filebeat daemon)---\n|  Logstash  |\n+-----+                      +---------------+                        +------------+\n\n\n\n\nOption2: Using a Filebeat sidecar\n\n\n+-----+                           +--------------------+                         +------------+\n| App |---(store logs locally)---\n| container log file |---(Filebeat sidecar)---\n|  Logstash  |\n+-----+                           +--------------------+                         +------------+\n\n\n\n\nReferences\n\n\n\n\nICP content playbook monitoring\n\n\nICP knowledge center", 
-            "title": "Logging"
+            "location": "/Google/", 
+            "text": "Sorting \n Searching\n\n\nSqrt(x)\n\n\n\n\nbrute force\n\n\nfor i in [0, x], find the last i so that \ni ^ 2 \n= x\n.\n\n\n\n\n\n\nbinary search\n\n\npredicate \nf(x) \n=\n x ^ 2 \n= target\n\n\ntrue, true, true, ..., false, false, false\n\nfind the last x so that f(x) is true.\n\u5c0f\u5fc3\nlo = mid\n \u5bb9\u6613\u5f15\u8d77\u6b7b\u5faa\u73af\n\nmid = lo + ~~((hi - lo + 1) / 2)\n to avoid dead loop\n\n\n\n\n\n\n\n\nvar\n \nmySqrt\n \n=\n \nfunction\n(\nx\n)\n \n{\n\n    \nlet\n \nlo\n \n=\n \n0\n,\n \nhi\n \n=\n \nx\n;\n\n    \nwhile\n \n(\nlo\n \n \nhi\n)\n \n{\n\n        \nlet\n \nmid\n \n=\n \nlo\n \n+\n \n~~\n((\nhi\n \n-\n \nlo\n \n+\n \n1\n)\n \n/\n \n2\n);\n\n        \nif\n \n(\nmid\n \n*\n \nmid\n \n \nx\n)\n \n{\n\n            \nhi\n \n=\n \nmid\n \n-\n \n1\n;\n\n        \n}\n \nelse\n \n{\n\n            \nlo\n \n=\n \nmid\n;\n\n        \n}\n\n    \n}\n\n    \nreturn\n \nlo\n;\n\n\n};", 
+            "title": "Google"
         }, 
         {
-            "location": "/logging/#logging-demo", 
-            "text": "This demo explains how to leverage ICP's logging stack to ship your application logs with two examples. Please refer to  ICP content playbook  for more info.  The related code is under  icp-content-demos/logging-demo", 
-            "title": "Logging demo"
+            "location": "/Google/#sorting-searching", 
+            "text": "", 
+            "title": "Sorting &amp; Searching"
         }, 
         {
-            "location": "/logging/#getting-started-option-1-automatic-log-collection", 
-            "text": "The  kubectl run  line below will create a  nginx   pods  listening on port 80. It will also create a  deployment  named  my-nginx  to ensure that there are always two pods running.   kubectl run my-nginx --image=nginx --replicas=1 --port=80   The nginx server ships the log directly to stdout/stderr\nTo see the logs, first you need to hit the nginx end point to generate logs.   kubectl port-forward  nginx-pod-name  8000:80    Open  localhost:8000  in your browser, and you can see the welcome page from nginx, a log entry will be generated at the same time.    To check the logs via Kibana, go to  https:// icp cluster ip :8443/kibana/  and search for  my-nginx , you can see the log entries.", 
-            "title": "Getting started (Option 1: Automatic log collection)"
+            "location": "/Google/#sqrtx", 
+            "text": "brute force  for i in [0, x], find the last i so that  i ^ 2  = x .    binary search  predicate  f(x)  =  x ^ 2  = target  true, true, true, ..., false, false, false \nfind the last x so that f(x) is true.\n\u5c0f\u5fc3 lo = mid  \u5bb9\u6613\u5f15\u8d77\u6b7b\u5faa\u73af mid = lo + ~~((hi - lo + 1) / 2)  to avoid dead loop     var   mySqrt   =   function ( x )   { \n     let   lo   =   0 ,   hi   =   x ; \n     while   ( lo     hi )   { \n         let   mid   =   lo   +   ~~ (( hi   -   lo   +   1 )   /   2 ); \n         if   ( mid   *   mid     x )   { \n             hi   =   mid   -   1 ; \n         }   else   { \n             lo   =   mid ; \n         } \n     } \n     return   lo ;  };", 
+            "title": "Sqrt(x)"
         }, 
         {
-            "location": "/logging/#logging-data-flow", 
-            "text": "Option 1: Automatic log collection  +-----+                      +---------------+                        +------------+\n| App |---(stdout/stderr)--- | host log file |---(Filebeat daemon)--- |  Logstash  |\n+-----+                      +---------------+                        +------------+  Option2: Using a Filebeat sidecar  +-----+                           +--------------------+                         +------------+\n| App |---(store logs locally)--- | container log file |---(Filebeat sidecar)--- |  Logstash  |\n+-----+                           +--------------------+                         +------------+", 
-            "title": "Logging Data flow"
+            "location": "/Linkedin/", 
+            "text": "Algorithm", 
+            "title": "Linkedin"
         }, 
         {
-            "location": "/logging/#references", 
-            "text": "ICP content playbook monitoring  ICP knowledge center", 
-            "title": "References"
-        }, 
-        {
-            "location": "/monitoring/", 
-            "text": "Monitoring demo\n\n\nThis demo explains how to leverage ICP's monitoring stack by using statsd exporter to ship statsd metrics to ICP prometheus server to monitor the status of your applications. If your application is using other format of metrics other than statsd, please refer to \nICP content playbook\n for other alternatives.\n\n\nThe related code is under \nicp-content-demos/monitoring-demo\n\n\nGetting started\n\n\n\n\nclone repo\n\n\n\n\n    git clone git@github.ibm.com:watson-foundation-services/icp-content-demos.git\n    cd icp-content-demos\n\n\n\n\n\n\nbuild image \n push image to icp docker registry\n\n\n\n\n    docker build -t mycluster.icp:8500/default/olympus ./monitoring-demo/olympus-app\n    docker pull prom/statsd-exporter:latest\n    docker tag prom/statsd-exporter:latest mycluster.icp:8500/default/statsd-exporter:latest\n    docker push mycluster.icp:8500/default/olympus:latest\n    docker push mycluster.icp:8500/default/statsd-exporter:latest\n\n\n\n\n\n\ncreate k8s deployment and check if the pod is running\n\n\n\n\n    //create deployment\n    kubectl apply -f ./monitoring-demo/kube/olympus-app/deployment.yml\n    // check pod is running\n    kubectl get pod\n    //you should see something like :\n    // olympus-deployment-675455594b-rdxfh 2/2 Running 0 16s\n\n\n\n\n\n\ncheck the application end point and metrics end point locally\n\n\n\n\n    //port forward your localhost port 8000 to the app server end point port.\n    kubectl port-forward \npodName\n 8000:80\n    //podName is the same as above\n\n    open http://localhost:8000/hello in your browser\n    // you should see 'hello world'\n\n    //port forward your localhost port 9102 to the statsD exporter metrics port.\n    kubectl port-forward \npodName\n 9102\n    //podName something like olympus-deployment-675455594b-dg2l2\n\n    open http://localhost:9102/metrics in your browser\n    // you should see prometheus metrics there including `hello_requests_total`\n    // the value of this key indicates how many times you've hit `/hello` end point\n\n\n\n\n\n\nenable Prometheus scraping by exposing metrics end point as a k8s service\n\n\n\n\n    //expose metric endpoint as a service for Prometheus server to scrape\n    kubectl apply -f ./monitoring-demo/kube/olympus-app/metrics-service.yaml\n\n\n\n\n\n\ncheck the metrics scraped by the ICP Prometheus server\n\n\n\n\n    //port forward your localhost port 9090 to ICP prometheus server UI endpoint\n    //note that the exact prometheus server name is different on your ICP cluster\n    //use \nkubectl get pod -n kube-system\n to check the pod name\n    kubectl port-forward -n kube-system monitoring-prometheus-5dd997d76b-jbqt6 9090\n\n    open http://localhost:9090/targets\n    // you should see http://10.1.242.142:9102/metrics being UP in kubernetes-service-endpoints\n    // which means the app metrics is now being cralwed by prometheus server\n\n    open http://localhost:9090/graph?g0.range_input=1h\ng0.expr=hello_requests_total\ng0.tab=0\n    // you should see app metrics being visualized by Prometheus simeple built-in UI\n\n    open http://localhost:9090/graph?g0.range_input=1h\ng0.expr=hello_requests_total\ng0.tab=1e\n    and you can see the query statement in the console tab.\n\n\n\n\n\n\ncreate a new graphana dashboard and copy \n paste the same query statement to the graph\nand you should be able to see the metrics in the UI.\n\n\n\n\nMetrics Data flow\n\n\n+----------+                         +-------------------+                        +--------------+\n|  StatsD  |---(UDP/TCP repeater)---\n|  statsd_exporter  |\n---(scrape /metrics)---|  Prometheus  |\n+----------+                         +-------------------+                        +--------------+\n\n\n\n\n\n\nOur Django application sends StatsD metrics to statsd_exporter daemon. We \ndeploy\n our Django application wtih statsd_exporter running in the same K8s Pod. It exposes 8000 (uWSGI) and 9102 (statsd_exporter's generated Prometheus metrics) container ports.\n\n\nWe enable Prometheus scraping by exposing metrics end point as a k8s \nservice\n with the annotation: \nprometheus.io/scrape: 'true'\n.\n\n\nThe metrics will be scraped by the Prometheus server and you can check ICP's graphana dashboard to query the exposed metrics.\n\n\n\n\nReferences\n\n\n\n\nInstrumenting Django with Prometheus and StatsD\n\n\nStatsD to Prometheus metrics exporter\n\n\nICP content playbook monitoring", 
-            "title": "Monitoring"
-        }, 
-        {
-            "location": "/monitoring/#monitoring-demo", 
-            "text": "This demo explains how to leverage ICP's monitoring stack by using statsd exporter to ship statsd metrics to ICP prometheus server to monitor the status of your applications. If your application is using other format of metrics other than statsd, please refer to  ICP content playbook  for other alternatives.  The related code is under  icp-content-demos/monitoring-demo", 
-            "title": "Monitoring demo"
-        }, 
-        {
-            "location": "/monitoring/#getting-started", 
-            "text": "clone repo       git clone git@github.ibm.com:watson-foundation-services/icp-content-demos.git\n    cd icp-content-demos   build image   push image to icp docker registry       docker build -t mycluster.icp:8500/default/olympus ./monitoring-demo/olympus-app\n    docker pull prom/statsd-exporter:latest\n    docker tag prom/statsd-exporter:latest mycluster.icp:8500/default/statsd-exporter:latest\n    docker push mycluster.icp:8500/default/olympus:latest\n    docker push mycluster.icp:8500/default/statsd-exporter:latest   create k8s deployment and check if the pod is running       //create deployment\n    kubectl apply -f ./monitoring-demo/kube/olympus-app/deployment.yml\n    // check pod is running\n    kubectl get pod\n    //you should see something like :\n    // olympus-deployment-675455594b-rdxfh 2/2 Running 0 16s   check the application end point and metrics end point locally       //port forward your localhost port 8000 to the app server end point port.\n    kubectl port-forward  podName  8000:80\n    //podName is the same as above\n\n    open http://localhost:8000/hello in your browser\n    // you should see 'hello world'\n\n    //port forward your localhost port 9102 to the statsD exporter metrics port.\n    kubectl port-forward  podName  9102\n    //podName something like olympus-deployment-675455594b-dg2l2\n\n    open http://localhost:9102/metrics in your browser\n    // you should see prometheus metrics there including `hello_requests_total`\n    // the value of this key indicates how many times you've hit `/hello` end point   enable Prometheus scraping by exposing metrics end point as a k8s service       //expose metric endpoint as a service for Prometheus server to scrape\n    kubectl apply -f ./monitoring-demo/kube/olympus-app/metrics-service.yaml   check the metrics scraped by the ICP Prometheus server       //port forward your localhost port 9090 to ICP prometheus server UI endpoint\n    //note that the exact prometheus server name is different on your ICP cluster\n    //use  kubectl get pod -n kube-system  to check the pod name\n    kubectl port-forward -n kube-system monitoring-prometheus-5dd997d76b-jbqt6 9090\n\n    open http://localhost:9090/targets\n    // you should see http://10.1.242.142:9102/metrics being UP in kubernetes-service-endpoints\n    // which means the app metrics is now being cralwed by prometheus server\n\n    open http://localhost:9090/graph?g0.range_input=1h g0.expr=hello_requests_total g0.tab=0\n    // you should see app metrics being visualized by Prometheus simeple built-in UI\n\n    open http://localhost:9090/graph?g0.range_input=1h g0.expr=hello_requests_total g0.tab=1e\n    and you can see the query statement in the console tab.   create a new graphana dashboard and copy   paste the same query statement to the graph\nand you should be able to see the metrics in the UI.", 
-            "title": "Getting started"
-        }, 
-        {
-            "location": "/monitoring/#metrics-data-flow", 
-            "text": "+----------+                         +-------------------+                        +--------------+\n|  StatsD  |---(UDP/TCP repeater)--- |  statsd_exporter  | ---(scrape /metrics)---|  Prometheus  |\n+----------+                         +-------------------+                        +--------------+   Our Django application sends StatsD metrics to statsd_exporter daemon. We  deploy  our Django application wtih statsd_exporter running in the same K8s Pod. It exposes 8000 (uWSGI) and 9102 (statsd_exporter's generated Prometheus metrics) container ports.  We enable Prometheus scraping by exposing metrics end point as a k8s  service  with the annotation:  prometheus.io/scrape: 'true' .  The metrics will be scraped by the Prometheus server and you can check ICP's graphana dashboard to query the exposed metrics.", 
-            "title": "Metrics Data flow"
-        }, 
-        {
-            "location": "/monitoring/#references", 
-            "text": "Instrumenting Django with Prometheus and StatsD  StatsD to Prometheus metrics exporter  ICP content playbook monitoring", 
-            "title": "References"
+            "location": "/Linkedin/#algorithm", 
+            "text": "", 
+            "title": "Algorithm"
         }
     ]
 }
