@@ -1,0 +1,497 @@
+
+<!DOCTYPE html>
+<html lang="en" class="no-js">
+  <head>
+    
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width,initial-scale=1">
+      <meta http-equiv="x-ua-compatible" content="ie=edge">
+      
+        <meta name="description" content="A set of demo apps to show how to leverage ICP design pattern to build contents">
+      
+      
+        <link rel="canonical" href="https://pages.github.ibm.com/watson-foundation-services/icp-content-demos/monitoring/">
+      
+      
+      
+        <link rel="shortcut icon" href="../assets/images/favicon.png">
+      
+      <meta name="generator" content="mkdocs-0.16.3, mkdocs-material-1.10.1">
+    
+    
+      
+        <title>Monitoring - ICP content demos</title>
+      
+    
+    
+      <script src="../assets/javascripts/modernizr-e826f8942a.js"></script>
+    
+    
+      <link rel="stylesheet" href="../assets/stylesheets/application-a20f419c8e.css">
+      
+        <link rel="stylesheet" href="../assets/stylesheets/application-23f75ab9c7.palette.css">
+      
+    
+    
+      
+        
+        
+        
+        <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:300,400,400i,700|Roboto+Mono">
+        <style>body,input{font-family:"Roboto","Helvetica Neue",Helvetica,Arial,sans-serif}code,kbd,pre{font-family:"Roboto Mono","Courier New",Courier,monospace}</style>
+      
+      <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    
+    
+    
+  </head>
+  
+  
+  
+  
+    <body data-md-color-primary="cyan" data-md-color-accent="">
+  
+    <svg class="md-svg">
+      <defs>
+        
+        
+          <svg xmlns="http://www.w3.org/2000/svg" width="416" height="448" viewBox="0 0 416 448" id="github"><path fill="currentColor" d="M160 304q0 10-3.125 20.5t-10.75 19T128 352t-18.125-8.5-10.75-19T96 304t3.125-20.5 10.75-19T128 256t18.125 8.5 10.75 19T160 304zm160 0q0 10-3.125 20.5t-10.75 19T288 352t-18.125-8.5-10.75-19T256 304t3.125-20.5 10.75-19T288 256t18.125 8.5 10.75 19T320 304zm40 0q0-30-17.25-51T296 232q-10.25 0-48.75 5.25Q229.5 240 208 240t-39.25-2.75Q130.75 232 120 232q-29.5 0-46.75 21T56 304q0 22 8 38.375t20.25 25.75 30.5 15 35 7.375 37.25 1.75h42q20.5 0 37.25-1.75t35-7.375 30.5-15 20.25-25.75T360 304zm56-44q0 51.75-15.25 82.75-9.5 19.25-26.375 33.25t-35.25 21.5-42.5 11.875-42.875 5.5T212 416q-19.5 0-35.5-.75t-36.875-3.125-38.125-7.5-34.25-12.875T37 371.5t-21.5-28.75Q0 312 0 260q0-59.25 34-99-6.75-20.5-6.75-42.5 0-29 12.75-54.5 27 0 47.5 9.875t47.25 30.875Q171.5 96 212 96q37 0 70 8 26.25-20.5 46.75-30.25T376 64q12.75 25.5 12.75 54.5 0 21.75-6.75 42 34 40 34 99.5z"/></svg>
+        
+      </defs>
+    </svg>
+    <input class="md-toggle" data-md-toggle="drawer" type="checkbox" id="drawer">
+    <input class="md-toggle" data-md-toggle="search" type="checkbox" id="search">
+    <label class="md-overlay" data-md-component="overlay" for="drawer"></label>
+    
+      <header class="md-header" data-md-component="header">
+  <nav class="md-header-nav md-grid">
+    <div class="md-flex">
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <a href="https://pages.github.ibm.com/watson-foundation-services/icp-content-demos/" title="ICP content demos" class="md-header-nav__button md-logo">
+          
+            
+              <img src="../images/k8s.png" width="24" height="24">
+            
+          
+        </a>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        <label class="md-icon md-icon--menu md-header-nav__button" for="drawer"></label>
+      </div>
+      <div class="md-flex__cell md-flex__cell--stretch">
+        <span class="md-flex__ellipsis md-header-nav__title">
+          
+            
+              
+            
+            Monitoring
+          
+        </span>
+      </div>
+      <div class="md-flex__cell md-flex__cell--shrink">
+        
+          <label class="md-icon md-icon--search md-header-nav__button" for="search"></label>
+          
+<div class="md-search" data-md-component="search" role="dialog">
+  <label class="md-search__overlay" for="search"></label>
+  <div class="md-search__inner">
+    <form class="md-search__form" name="search">
+      <input type="text" class="md-search__input" name="query" required placeholder="Search" autocapitalize="off" autocorrect="off" autocomplete="off" spellcheck="false" data-md-component="query">
+      <label class="md-icon md-search__icon" for="search"></label>
+      <button type="reset" class="md-icon md-search__icon" data-md-component="reset">&#xE5CD;</button>
+    </form>
+    <div class="md-search__output">
+      <div class="md-search__scrollwrap" data-md-scrollfix>
+        <div class="md-search-result" data-md-component="result" data-md-lang-search="" data-md-lang-tokenizer="[\s\-]+">
+          <div class="md-search-result__meta" data-md-lang-result-none="No matching documents" data-md-lang-result-one="1 matching document" data-md-lang-result-other="# matching documents">
+            Type to start searching
+          </div>
+          <ol class="md-search-result__list"></ol>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+        
+      </div>
+      
+        <div class="md-flex__cell md-flex__cell--shrink">
+          <div class="md-header-nav__source">
+            
+
+
+  
+
+
+  <a href="https://github.ibm.com/watson-foundation-services/icp-content-demos.git" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      icp-content-demos
+    </div>
+  </a>
+
+          </div>
+        </div>
+      
+    </div>
+  </nav>
+</header>
+    
+    <div class="md-container">
+      
+      
+      <main class="md-main">
+        <div class="md-main__inner md-grid" data-md-component="container">
+          
+            
+              <div class="md-sidebar md-sidebar--primary" data-md-component="navigation">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    <nav class="md-nav md-nav--primary" data-md-level="0">
+  <label class="md-nav__title md-nav__title--site" for="drawer">
+    <div class="md-nav__button md-logo">
+      
+        
+          <img src="../images/k8s.png">
+        
+      
+    </div>
+    ICP content demos
+  </label>
+  
+    <div class="md-nav__source">
+      
+
+
+  
+
+
+  <a href="https://github.ibm.com/watson-foundation-services/icp-content-demos.git" title="Go to repository" class="md-source" data-md-source="github">
+    
+      <div class="md-source__icon">
+        <svg viewBox="0 0 24 24" width="24" height="24">
+          <use xlink:href="#github" width="24" height="24"></use>
+        </svg>
+      </div>
+    
+    <div class="md-source__repository">
+      icp-content-demos
+    </div>
+  </a>
+
+    </div>
+  
+  <ul class="md-nav__list" data-md-scrollfix>
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href=".." title="Home" class="md-nav__link">
+      Home
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+
+  <li class="md-nav__item">
+    <a href="../logging/" title="Logging" class="md-nav__link">
+      Logging
+    </a>
+  </li>
+
+    
+      
+      
+      
+
+  
+
+
+  <li class="md-nav__item md-nav__item--active">
+    
+    <input class="md-toggle md-nav__toggle" data-md-toggle="toc" type="checkbox" id="toc">
+    
+      
+    
+    
+      <label class="md-nav__link md-nav__link--active" for="toc">
+        Monitoring
+      </label>
+    
+    <a href="./" title="Monitoring" class="md-nav__link md-nav__link--active">
+      Monitoring
+    </a>
+    
+      
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" title="Getting started" class="md-nav__link">
+    Getting started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-data-flow" title="Metrics Data flow" class="md-nav__link">
+    Metrics Data flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+    
+  </li>
+
+    
+  </ul>
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+            
+              <div class="md-sidebar md-sidebar--secondary" data-md-component="toc">
+                <div class="md-sidebar__scrollwrap">
+                  <div class="md-sidebar__inner">
+                    
+<nav class="md-nav md-nav--secondary">
+  
+  
+    
+  
+  
+    <label class="md-nav__title" for="toc">Table of contents</label>
+    <ul class="md-nav__list" data-md-scrollfix>
+      
+        <li class="md-nav__item">
+  <a href="#getting-started" title="Getting started" class="md-nav__link">
+    Getting started
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#metrics-data-flow" title="Metrics Data flow" class="md-nav__link">
+    Metrics Data flow
+  </a>
+  
+</li>
+      
+        <li class="md-nav__item">
+  <a href="#references" title="References" class="md-nav__link">
+    References
+  </a>
+  
+</li>
+      
+      
+      
+    </ul>
+  
+</nav>
+                  </div>
+                </div>
+              </div>
+            
+          
+          <div class="md-content">
+            <article class="md-content__inner md-typeset">
+              
+                
+                
+                <h1 id="monitoring-demo">Monitoring demo</h1>
+<p>This demo explains how to leverage ICP's monitoring stack by using statsd exporter to ship statsd metrics to ICP prometheus server to monitor the status of your applications. If your application is using other format of metrics other than statsd, please refer to <a href="http://icp-content-playbook.rch.stglabs.ibm.com/monitoring/">ICP content playbook</a> for other alternatives.</p>
+<p>The related code is under <a href="https://github.ibm.com/watson-foundation-services/icp-content-demos/tree/master/monitoring-demo">icp-content-demos/monitoring-demo</a></p>
+<h2 id="getting-started">Getting started</h2>
+<ul>
+<li>clone repo</li>
+</ul>
+<pre><code>    git clone git@github.ibm.com:watson-foundation-services/icp-content-demos.git
+    cd icp-content-demos
+</code></pre>
+
+<ul>
+<li>build image &amp; push image to icp docker registry</li>
+</ul>
+<pre><code>    docker build -t mycluster.icp:8500/default/olympus ./monitoring-demo/olympus-app
+    docker pull prom/statsd-exporter:latest
+    docker tag prom/statsd-exporter:latest mycluster.icp:8500/default/statsd-exporter:latest
+    docker push mycluster.icp:8500/default/olympus:latest
+    docker push mycluster.icp:8500/default/statsd-exporter:latest
+</code></pre>
+
+<ul>
+<li>create k8s deployment and check if the pod is running</li>
+</ul>
+<pre><code>    //create deployment
+    kubectl apply -f ./monitoring-demo/kube/olympus-app/deployment.yml
+    // check pod is running
+    kubectl get pod
+    //you should see something like :
+    // olympus-deployment-675455594b-rdxfh 2/2 Running 0 16s
+</code></pre>
+
+<ul>
+<li>check the application end point and metrics end point locally</li>
+</ul>
+<pre><code>    //port forward your localhost port 8000 to the app server end point port.
+    kubectl port-forward &lt;podName&gt; 8000:80
+    //podName is the same as above
+
+    open http://localhost:8000/hello in your browser
+    // you should see 'hello world'
+
+    //port forward your localhost port 9102 to the statsD exporter metrics port.
+    kubectl port-forward &lt;podName&gt; 9102
+    //podName something like olympus-deployment-675455594b-dg2l2
+
+    open http://localhost:9102/metrics in your browser
+    // you should see prometheus metrics there including `hello_requests_total`
+    // the value of this key indicates how many times you've hit `/hello` end point
+</code></pre>
+
+<ul>
+<li>enable Prometheus scraping by exposing metrics end point as a k8s service</li>
+</ul>
+<pre><code>    //expose metric endpoint as a service for Prometheus server to scrape
+    kubectl apply -f ./monitoring-demo/kube/olympus-app/metrics-service.yaml
+</code></pre>
+
+<ul>
+<li>check the metrics scraped by the ICP Prometheus server</li>
+</ul>
+<pre><code>    //port forward your localhost port 9090 to ICP prometheus server UI endpoint
+    //note that the exact prometheus server name is different on your ICP cluster
+    //use &quot;kubectl get pod -n kube-system&quot; to check the pod name
+    kubectl port-forward -n kube-system monitoring-prometheus-5dd997d76b-jbqt6 9090
+
+    open http://localhost:9090/targets
+    // you should see http://10.1.242.142:9102/metrics being UP in kubernetes-service-endpoints
+    // which means the app metrics is now being cralwed by prometheus server
+
+    open http://localhost:9090/graph?g0.range_input=1h&amp;g0.expr=hello_requests_total&amp;g0.tab=0
+    // you should see app metrics being visualized by Prometheus simeple built-in UI
+
+    open http://localhost:9090/graph?g0.range_input=1h&amp;g0.expr=hello_requests_total&amp;g0.tab=1e
+    and you can see the query statement in the console tab.
+</code></pre>
+
+<ul>
+<li>create a new graphana dashboard and copy &amp; paste the same query statement to the graph
+and you should be able to see the metrics in the UI.</li>
+</ul>
+<h2 id="metrics-data-flow">Metrics Data flow</h2>
+<pre><code>+----------+                         +-------------------+                        +--------------+
+|  StatsD  |---(UDP/TCP repeater)---&gt;|  statsd_exporter  |&lt;---(scrape /metrics)---|  Prometheus  |
++----------+                         +-------------------+                        +--------------+
+</code></pre>
+
+<ul>
+<li>Our Django application sends StatsD metrics to statsd_exporter daemon. We <a href="https://github.ibm.com/watson-foundation-services/icp-content-demos/blob/master/monitoring-demo/kube/olympus-app/deployment.yml">deploy</a> our Django application wtih statsd_exporter running in the same K8s Pod. It exposes 8000 (uWSGI) and 9102 (statsd_exporter's generated Prometheus metrics) container ports.</li>
+<li>We enable Prometheus scraping by exposing metrics end point as a k8s <a href="https://github.ibm.com/watson-foundation-services/icp-content-demos/blob/master/monitoring-demo/kube/olympus-app/metrics-service.yaml">service</a> with the annotation: <code>prometheus.io/scrape: 'true'</code>.</li>
+<li>The metrics will be scraped by the Prometheus server and you can check ICP's graphana dashboard to query the exposed metrics.</li>
+</ul>
+<h2 id="references">References</h2>
+<ul>
+<li><a href="http://marselester.com/django-prometheus-via-statsd.html">Instrumenting Django with Prometheus and StatsD</a></li>
+<li><a href="https://github.com/prometheus/statsd_exporter">StatsD to Prometheus metrics exporter</a></li>
+<li><a href="http://icp-content-playbook.rch.stglabs.ibm.com/monitoring/">ICP content playbook monitoring</a></li>
+</ul>
+                
+                  
+                
+              
+              
+                
+              
+            </article>
+          </div>
+        </div>
+      </main>
+      
+        
+<footer class="md-footer">
+  
+    <div class="md-footer-nav">
+      <nav class="md-footer-nav__inner md-grid">
+        
+          <a href="../logging/" title="Logging" class="md-flex md-footer-nav__link md-footer-nav__link--prev" rel="prev">
+            <div class="md-flex__cell md-flex__cell--shrink">
+              <i class="md-icon md-icon--arrow-back md-footer-nav__button"></i>
+            </div>
+            <div class="md-flex__cell md-flex__cell--stretch md-footer-nav__title">
+              <span class="md-flex__ellipsis">
+                <span class="md-footer-nav__direction">
+                  Previous
+                </span>
+                Logging
+              </span>
+            </div>
+          </a>
+        
+        
+      </nav>
+    </div>
+  
+  <div class="md-footer-meta md-typeset">
+    <div class="md-footer-meta__inner md-grid">
+      <div class="md-footer-copyright">
+        
+        powered by
+        <a href="http://www.mkdocs.org" title="MkDocs">MkDocs</a>
+        and
+        <a href="http://squidfunk.github.io/mkdocs-material/" title="Material for MkDocs">
+          Material for MkDocs</a>
+      </div>
+      
+        
+      
+    </div>
+  </div>
+</footer>
+      
+    </div>
+    
+      <script src="../assets/javascripts/application-f3ab9e5ff8.js"></script>
+      
+      
+      <script>app.initialize({url:{base:".."}})</script>
+      
+    
+    
+      
+    
+  </body>
+</html>

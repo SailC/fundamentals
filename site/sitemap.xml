@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+
+    
+    <url>
+     <loc>https://pages.github.ibm.com/watson-foundation-services/icp-content-demos//</loc>
+     <lastmod>2018-02-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>https://pages.github.ibm.com/watson-foundation-services/icp-content-demos//logging/</loc>
+     <lastmod>2018-02-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+    
+    <url>
+     <loc>https://pages.github.ibm.com/watson-foundation-services/icp-content-demos//monitoring/</loc>
+     <lastmod>2018-02-15</lastmod>
+     <changefreq>daily</changefreq>
+    </url>
+    
+
+</urlset>

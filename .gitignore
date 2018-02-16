@@ -1,0 +1,6 @@
+*.pyc
+.DS_Store
+/olympus-app/venv
+/olympus-app/db.sqlite3
+/weather-app/venv
+/weather-app/db.sqlite3
