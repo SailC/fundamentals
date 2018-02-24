@@ -9,4 +9,3 @@ Available commands:
 - `make publish` Publish mkdocs to the [github page]([https://pages.github.ibm.com/watson-foundation-services/icp-content-demos/](https://pages.github.ibm.com/watson-foundation-services/icp-content-demos/)) . Behind the scenes, MkDocs will build your docs and use the ghp-import tool to commit them to the gh-pages branch and push the gh-pages branch to GitHub.
 
 To create new pages, simply add/modify markdown files under [icp-content-demos/docs](https://github.ibm.com/watson-foundation-services/icp-content-demos/tree/master/docs), and `mkdocs build` will build the pages under [icp-content-demos/site](https://github.ibm.com/watson-foundation-services/icp-content-demos/tree/master/site) from the markdown files.
-# fundamentals
