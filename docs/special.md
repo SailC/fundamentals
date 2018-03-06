@@ -15,7 +15,7 @@ Query the range sum takes `O(lgn)`
 Space complexity `O(n)`
 
 ![Motivation](http://zxi.mytechroad.com/blog/wp-content/uploads/2018/01/sp3-1.png)
-![Update & Query](http://zxi.mytechroad.com/blog/wp-content/uploads/2018/01/sp3-1.png)
+![Update & Query](http://zxi.mytechroad.com/blog/wp-content/uploads/2018/01/sp3-2.png)
 
 ```javascript
 class BIT {
@@ -47,6 +47,21 @@ class BIT {
 ```
 
 ## 2D binary indexed tree. Query `O(lgm lgn)`, update `O(lgm lgn)`
+
+> BIT只不过是一颗虚拟的树，目的是将部分和存在不同节点里，这种分散的存储便于更新，因为只需要更新
+> 一部分节点。BIT根据最低位的1bit将节点和她的parent链接起来
+> 2D BIT也是一种partial sum的虚拟映射关系，只不过这个映射过程是二维的，先将行做映射，确定当前节点
+> 对应那些行的partial sum之和，然后对于每一行，对列进行映射.
+
+```
+节点(4, 4) = sum(matrix[1][1], matrix[1][2], matrix[1][4],
+                matrix[2][1], matrix[2][2], matrix[2][4],
+                matrix[4][1], matrix[4][2], matrix[4][4],
+                )
+```
+
+![1](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/09/304-ep63-1.png)
+![2](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/09/304-ep63-2.png)
 
 ```javascript
 class BIT {

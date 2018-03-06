@@ -112,3 +112,31 @@ var longestWord = function(words) {
     return result;
 };
 ```
+---
+## [Sentence Similarity](https://leetcode.com/problems/sentence-similarity/description/)
+`一遍过` `hashset`
+
+1.hashset
+> To check whether words1[i] and words2[i] are similar, either they are the same word, or (words1[i], words2[i]) or (words2[i], words1[i]) appear in pairs.
+> To check whether (words1[i], words2[i]) appears in pairs quickly, we could put all such pairs into a Set structure.
+> Time Complexity:  O(|pairs| + |words1|)
+
+```javascript
+var areSentencesSimilar = function(words1, words2, pairs) {
+    let m = words1.length, n = words2.length;
+    if (m !== n) return false;
+    let set = new Set();
+    const getKey = (w1, w2) => `${w1}:${w2}`;
+
+    for (let [w1, w2] of pairs) {
+        set.add(getKey(w1, w2));
+        set.add(getKey(w2, w1));
+    }
+    for (let i = 0; i < n; i++) {
+        let w1 = words1[i], w2 = words2[i];
+        let key = getKey(w1, w2);
+        if (w1 !== w2 && !set.has(key)) return false;
+    }
+    return true;
+};
+```

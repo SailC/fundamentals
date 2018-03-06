@@ -99,40 +99,8 @@ findTarget = function(root, k) {
 };
 ```
 ---
-## [Best Time to Buy and Sell Stock](https://leetcode.com/problems/best-time-to-buy-and-sell-stock/description/)
-
-`一遍过` `回味` `dp`
-
-![Thoughts](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/12/121-ep140-1.png)
-
-```javascript
-var maxProfit = function(prices) {
-    let lo = prices[0], n = prices.length;
-    let maxPro = 0;
-    for (let i = 1; i < n; i++) {
-        let profit = prices[i] - lo;
-        maxPro = Math.max(maxPro, profit);
-        lo = Math.min(lo, prices[i]);
-    }
-    return maxPro;
-};
-
-maxProfit = function(prices) {
-    let n = prices.length;
-    let gain = [];
-    for (let i = 1; i < n; i++) gain.push(prices[i] - prices[i - 1]);
-    return maxSubArr(gain);
-}
-
-function maxSubArr(gain) {
-    let n = gain.length;
-    let maxVal = 0, curVal = 0;
-    for (let i = 0; i < n; i++) {
-        curVal = Math.max(gain[i], gain[i] + curVal);
-        maxVal = Math.max(maxVal, curVal);
-    }
-    return maxVal;
-}
-```
+## [Best Time to Buy and Sell Stock](./dp.md#best-time-to-buy-and-sell-stock)
 ---
 ## [Number of Islands](./dfs.md#number-of-islands)
+---
+## [Partition to K equal Sum subset](./dp.md#partition-to-k-equal-sum-subset)
