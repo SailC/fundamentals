@@ -23,3 +23,20 @@ var selfDividingNumbers = function(left, right) {
     return result;
 };
 ```
+---
+## [pow(x,n)](https://leetcode.com/problems/powx-n/description/)
+
+1. `divide & conquer`
+> edge case1: `n < 0`
+> edge case2: `n === 0`
+> save `myPow(x, n / 2)` to reduce time complexity.
+
+```javascript
+var myPow = function(x, n) {
+    if (n < 0) return 1 / myPow(x, -n);
+    if (n === 0) return 1;
+    if (x === 0) return 0;
+    let half = myPow(x, ~~(n / 2));
+    return n % 2 === 0 ? half * half : half * half * x;
+};
+```

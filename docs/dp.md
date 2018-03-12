@@ -858,27 +858,24 @@ minPathSum = function(grid) {
 
 ```javascript
 var numDecodings = function(s) {
-    if (s.length === 0) return 0;
-
+    let n = s.length;
+    if (n === 0) return 0;
     let codeMap = new Set();
     for (let code = 1; code <= 26; code++) {
         codeMap.add(String(code));
     }
+    let cache = new Array(n + 1).fill(-1);
 
-    let cache = new Map();
-
-    function decode(s) {
-        if (s.length === 0) return 1;
-        if (s.length === 1) return codeMap.has(s[0]) ? 1: 0;
-        if (cache.has(s)) return cache.get(s);
-        let takeOneDigit = codeMap.has(s[0]) ? decode(s.slice(1)) : 0;
-        let takeTwoDigit = codeMap.has(s.slice(0, 2)) ? decode(s.slice(2)) : 0;
-        let result = takeOneDigit + takeTwoDigit;
-        cache.set(s, result);
-        return result;
+    function decode(i) {
+        if (i === n) return 1;
+        if (cache[i] !== -1) return cache[i];
+        let takeOneDigit = codeMap.has(s[i]) ? decode(i + 1) : 0;
+        let takeTwoDigit = (i < n - 1 && codeMap.has(s.slice(i, i + 2))) ? decode(i + 2) : 0;
+        cache[i] = takeOneDigit + takeTwoDigit;
+        return cache[i];
     }
 
-    return decode(s);
+    return decode(0);
 };
 
 var numDecodings = function(s) {
@@ -1083,7 +1080,7 @@ maxProfit = function(prices) {
     for (let price of prices) {
         let prevHold = hold;
         hold = Math.max(hold, sold - price);
-        sold = Math.max(sold, hold + price);
+        sold = Math.max(sold, prevHold + price);
     }
     return sold;
 };
@@ -2148,3 +2145,151 @@ var wordBreak = function(s, wordDict) {
 };
 ```
 ---
+## [regular expression matching](https://leetcode.com/problems/regular-expression-matching/description/)
+
+> 关键是 `*` 这里要带走一个preceding char，所以如果是计划递归从前到后扫描的时候要记得look one step further，先讨论 `p[j + 1] === '*'` 的情况
+> edge case : j === n , i === m 要分别讨论
+> bottom up dp 也是先初始化edge case. 然后再两边都有字符的情况下放心开始dp
+
+```javascript
+var isMatch = function(s, p) {
+    let m = s.length, n = p.length;
+    let cache = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(null));
+    function match(i, j) {
+        if (j === n) return i === m;
+        if (i === m) return j < n - 1 && p[j + 1] === '*' && match(i, j + 2);
+        if (cache[i][j] !== null) return cache[i][j];
+        let firstMatch = p[j] === '.' || p[j] === s[i];
+        if (j < n - 1 && p[j + 1] === '*') {
+            cache[i][j] = match(i, j + 2) || (firstMatch && match(i + 1, j));
+        } else {
+            cache[i][j] = firstMatch && match(i + 1, j + 1);
+        }
+        return cache[i][j];
+    }
+    return match(0, 0);
+};
+
+var isMatch = function(s, p) {
+    let m = s.length, n = p.length;
+    let dp = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(false));
+    dp[0][0] = true;
+    for (let i = 1; i <= n; i++) dp[0][i] = i > 1 && p[i - 1] === '*' && dp[0][i - 2];
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (p[j - 1] === '*') {
+                dp[i][j] = dp[i][j - 2] || ((p[j - 2] === '.' || p[j - 2] === s[i - 1]) && dp[i - 1][j]);
+            } else {
+                dp[i][j] = (p[j - 1] === '.' || p[j - 1] === s[i - 1]) && dp[i - 1][j - 1];
+            }
+        }
+    }
+    return dp[m][n];
+};
+```
+---
+## [wild card matching](https://leetcode.com/problems/wildcard-matching/description/)
+
+> The difference is that: the * in this problem can match any sequence independently, while the * in Regex Matching would only match duplicates, if any, of the character prior to it.
+
+```javascript
+var isMatch = function(s, p) {
+    let m = s.length, n = p.length;
+    let cache = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(null));
+    function match(i, j) {
+        if (j === n) return i === m;
+        if (i === m) return p[j] === '*' && match(i, j + 1);
+        if (cache[i][j] !== null) return cache[i][j];
+
+        let firstMatch = p[j] === '?' || p[j] === s[i];
+        if (p[j] === '*') {
+            cache[i][j] = match(i, j + 1) || match(i + 1, j);
+        } else {
+            cache[i][j] = firstMatch && match(i + 1, j + 1);
+        }
+        return cache[i][j];
+    }
+    return match(0, 0);
+};
+
+isMatch = function(s, p) {
+    let m = s.length, n = p.length;
+    let dp = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(false));
+    dp[0][0] = true;
+    for (let i = 1; i <= n; i++) dp[0][i] = p[i - 1] === '*' && dp[0][i - 1];
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (p[j - 1] === '*') {
+                dp[i][j] = dp[i][j - 1] || dp[i - 1][j];
+            } else {
+                dp[i][j] = (p[j - 1] === '?' || p[j - 1] === s[i - 1]) && dp[i - 1][j - 1];
+            }
+        }
+    }
+    return dp[m][n];
+};
+```
+---
+## [palindrom substring](https://leetcode.com/problems/palindromic-substrings/description/)
+
+`Denifition of Palindrom`
+> `s[i: j] is palin === (s[i] === s[j] && s[i+1: j - 1] is palin)`
+> edge case:
+> by our definition, if s[i: j) contains less than 2 elements, it's a palindrom.
+
+```javascript
+var countSubstrings = function(s) {
+    let n = s.length;
+    let cache = new Array(n).fill(0).map(x => new Array(n).fill(null));
+
+    function isPalin(i, j) {
+        if (i >= j) return true;
+        if (cache[i][j] !== null) return cache[i][j];
+        cache[i][j] = s[i] === s[j] && isPalin(i + 1, j - 1);
+        return cache[i][j];
+    }
+
+    let cnt = 0;
+    for (let i = 0; i < n; i++) {
+        for (let j = i; j < n; j++) {
+            if (isPalin(i, j)) cnt++;
+        }
+    }
+    return cnt;
+};
+
+var countSubstrings = function(s) {
+    let n = s.length;
+    let dp = new Array(n).fill(0).map(x => new Array(n).fill(false));
+    let cnt = 0;
+    for (let i = n - 1; i >= 0; i--) {
+        for (let j = i; j < n; j++) {
+            if (j === i) {
+                dp[i][j] = true;
+            } else {
+                dp[i][j] = s[i] === s[j] && (j === i + 1 || dp[i + 1][j - 1]);
+            }
+            cnt += dp[i][j] ? 1 : 0;
+        }
+    }
+    return cnt;
+};
+
+var countSubstrings = function(s) {
+    let cnt = 0;
+    for (let i = 0; i < s.length; i++) cnt += countFrom(s, i, i);
+    for (let i = 0; i < s.length - 1; i++) cnt += countFrom(s, i, i + 1);
+    return cnt;
+};
+
+function countFrom(s, lo, hi) {
+    if (s[lo] !== s[hi]) return 0;
+    let cnt = 0; //s[lo] === s[hi] , itself is a palindrome
+    while (lo >= 0 && hi < s.length && s[lo] === s[hi]) {
+        cnt++;
+        lo--;
+        hi++;
+    }
+    return cnt;
+}
+```

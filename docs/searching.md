@@ -73,3 +73,77 @@ combinationSum3 = function(k, n) {
     return combs;
 };
 ```
+---
+## [nested list weight sum](https://leetcode.com/problems/nested-list-weight-sum/description/)
+
+1. dfs
+> each nest level indicates 1 level deeper
+> sum of current level = current integer val  * depth + sum of next level
+
+```javascript
+var depthSum = function(nestedList) {
+    function dfs(list, depth) {
+        let sum = 0;
+        for (let nestInt of list) {
+            if (nestInt.isInteger()) sum += depth * nestInt.getInteger();
+            else sum += dfs(nestInt.getList(), depth + 1);
+        }
+        return sum;
+    }
+    return dfs(nestedList, 1);
+};
+```
+
+---
+## [nested list weight sum II](https://leetcode.com/problems/nested-list-weight-sum-ii/description/)
+
+1. two pass (bottom up + topdown)
+> calculate height first and use nested lsit weight sum i
+2. one pass with accSum
+> each upper level sum will appear in the next level , and we need to acc the sum of each level
+
+```javascript
+var depthSumInverse = function(nestedList) {
+    let sum = 0, accSum = 0;
+    let que = nestedList;
+
+    while (que.length > 0) {
+        let nextQue = [];
+        for (let nestInt of que) {
+            if (nestInt.isInteger()) {
+                sum += nestInt.getInteger();
+            } else {
+                for (let x of nestInt.getList()) nextQue.push(x);
+            }
+        }
+        que = nextQue;
+        accSum += sum;
+    }
+
+    return accSum;
+};
+
+depthSumInverse = function(nestedList) {
+    function getHeight(list) {
+        let depth = 1;
+        for (let nestInt of list) {
+            if (!nestInt.isInteger()) {
+                let d = getHeight(nestInt.getList());
+                depth = Math.max(depth, 1 + d);
+            }
+        }
+        return depth
+    }
+
+    function dfs(list, depth) {
+        let sum = 0;
+        for (let nestInt of list) {
+            if (nestInt.isInteger()) sum += depth * nestInt.getInteger();
+            else sum += dfs(nestInt.getList(), depth - 1);
+        }
+        return sum;
+    }
+
+    return dfs(nestedList, getHeight(nestedList));
+};
+```

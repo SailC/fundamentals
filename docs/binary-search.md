@@ -330,3 +330,61 @@ kthSmallestPrimeFraction = function(A, K) {
 };
 ```
 ---
+## [number of matching sebsequences](http://zxi.mytechroad.com/blog/string/leetcode-792-number-of-matching-subsequences/)
+
+> 我们的目标是，对每一个word，每一个char，我们都想迅速找到其在S中的位置，看看还有没有匹配.
+> 所以联系到hash position
+> 由于position数组是递增序列，所以通常可以用二分搜索
+
+![1](http://zxi.mytechroad.com/blog/wp-content/uploads/2018/03/792-ep172-1.png)
+
+```javascript
+var numMatchingSubseq = function(S, words) {
+    function subseq(a, b) {
+        let m = a.length, n = b.length;
+        let i = 0;
+        for (let j = 0; j < n && i < m; j++) {
+            if (a[i] === b[j]) i++;
+        }
+        return i === m;
+    }
+    let cnt = 0;
+    for (let word of words) {
+        if (subseq(word, S)) cnt++;
+    }
+    return cnt;
+};
+
+numMatchingSubseq = function(S, words) {
+    let pos = new Map();
+    for (let i = 0; i < S.length; i++) {
+        let c = S[i];
+        if (!pos.has(c)) pos.set(c, []);
+        pos.get(c).push(i);
+    }
+
+    function isSubseq(word) {
+        let prev = -1;
+        for (let c of word) {
+            if (!pos.has(c)) return false;
+            let arr = pos.get(c);
+            let idx = binSearch(arr, prev + 1);
+            if (idx === arr.length) return false;
+            prev = arr[idx];
+        }
+        return true;
+    }
+
+    function binSearch(arr, target) {
+        let lo = 0, hi = arr.length - 1;
+        while (lo < hi) {
+            let mid = lo + ~~((hi - lo) / 2);
+            if (arr[mid] < target) lo = mid + 1;
+            else hi = mid;
+        }
+        return arr[lo] >= target ? lo : lo + 1;
+    }
+
+    return words.filter(isSubseq).length;
+};
+```

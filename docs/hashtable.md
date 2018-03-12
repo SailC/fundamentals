@@ -24,6 +24,73 @@ var twoSum = function(nums, target) {
 };
 ```
 ---
+## [three sum](https://leetcode.com/problems/3sum/description/)
+
+> 外层循环是以 nums[i] 为第一个元素的3 sum，将第一个解作为uniq解进行skip dup
+> 如果是作为解的第一个元素，那么是依赖相同序列的第一个元素，if (i > 0 && nums[i] === nums[i - 1]) skip
+> 如果是作为解的最后一个元素，依赖相同序列的最后一个元素， if (i < n - 1 && nums[i] === nums[i + 1]) skip
+
+1.Sort + TwoPointers
+> 内层循环以 nums[lo] 作为第一个元素的 2sum，将第一个解作为uniq解进行skip dup
+> Time: O(n ^ 2)
+> Space: O(1)
+
+2.  Sort + HashTable
+> 内层循环以 nums[i] 作为最后一个元素的 2sum，将最后一个解作为uniq解
+> Time : O(n ^ 2)
+> Space: O(n)
+
+
+```javascript
+var threeSum = function(nums) {
+    // sorted array makes it easy to skip duplicates & use two pointers
+    nums.sort((a, b) => a - b);
+    let triplets = [];
+    for (let i = 0; i < nums.length; i++) {
+        if (i > 0 && nums[i] === nums[i - 1]) continue;
+        let doublets = twoSum(nums, i + 1, nums.length - 1, -nums[i]);
+        for (let doublet of doublets) triplets.push([nums[i], ...doublet]);
+    }
+    return triplets;
+};
+
+function twoSum (nums, lo, hi, target) {
+    let visited = new Set();
+    let result = [];
+    for (let i = lo; i <= hi; i++) {
+        if (i < hi && nums[i] === nums[i + 1]) {
+            visited.add(nums[i]);
+            continue;
+        }
+        if (visited.has(target - nums[i])) {
+            result.push([target - nums[i], nums[i]]);
+        }
+        visited.add(nums[i]);
+    }
+    return result;
+}
+
+function twoSum (nums, lo, hi, target) {
+    let result = new Set();
+    let [left, right] = [lo, hi];
+    while (lo < hi) {
+        if (lo > left && nums[lo] === nums[lo - 1]) {
+            lo++;
+            continue;
+        }
+        if (nums[lo] + nums[hi] === target) {
+            result.add([nums[lo++], nums[hi--]]);
+        } else if (nums[lo] + nums[hi] < target) {
+            lo++;
+        } else {
+            hi--;
+        }
+    }
+    return result;
+}
+```
+
+---
 ## [longest word dictionary](https://leetcode.com/problems/longest-word-in-dictionary/description/)
 
 0. brute force
@@ -138,5 +205,189 @@ var areSentencesSimilar = function(words1, words2, pairs) {
         if (w1 !== w2 && !set.has(key)) return false;
     }
     return true;
+};
+```
+---
+
+## [group anagram](https://leetcode.com/problems/group-anagrams/description/)
+
+1. Normalize by sorting + HashTable
+> two anagrams share the same characters, sort them will result in the same word (we call it normalized key).
+> Use the normalized key as the key of the hashtable, and the value of the hashtable is the list of the orginal words sharing the same normalized key.
+return the list of values of the hashmap, which can be done by `[...map.values()]`
+> - Time: O(n * m lgm) n is the # of words, m is the length of each word
+> - Space: O(n)
+
+2. Normalize by couting + HashTable
+> change the normalization function from sorting to counting. Make a array of size 26 to save the cnt of each characters in the word, and join the array with a separater to avoid confusion (e.g. a:1 b:2 v.s. a:12 b:0)
+> - Time: O(n * m)
+> - Space: O(n)
+
+```javascript
+var groupAnagrams = function(strs) {
+    const normalize = word => word.split('').sort().join('');
+    let map = new Map(); // map normalized word => a list of original words
+    for (let word of strs) {
+        let key = normalize(word);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(word);
+    }
+    return [...map.values()];
+};
+
+var groupAnagrams = function(strs) {
+    // const normalize = word => word.split('').sort().join('');
+    const normalize = word => {
+        let keyArr = new Array(26).fill(0);
+        for (let c of word) keyArr[c.charCodeAt(0) - 'a'.charCodeAt(0)]++;
+        return keyArr.join('#');
+    };
+    let map = new Map(); // map normalized word => a list of original words
+    for (let word of strs) {
+        let key = normalize(word);
+        if (!map.has(key)) map.set(key, []);
+        map.get(key).push(word);
+    }
+    return [...map.values()];
+};
+```
+---
+## [longest consecutive sequence](https://leetcode.com/problems/longest-consecutive-sequence/description/)
+
+1. HashSet + Bruteforce
+> We use a hashset to save all the appeared number, this can help delete the duplicates, which only complicates the problem.
+> Then we iterate through all the number one by one, for each number we try to extend it to both left & right as much as possible by checking if the boundaries are in the hashset.
+> Time : O(n ^ 2)
+> Space: O(n)
+> Optimization: instead of extend it both left & right direction, we only consider on direction. Let's say, we only consider to extend the number to the right as much as possible. e.g. [1,2,3,4] when we pick 3 as the starting point, we don't look backward, as the same sequence can be constructed by starting with 1 or 2.
+
+2. HashSet + Skipping meaningless element
+> As we can see from the optimization above, when we pick 3, we don't look backward, because the same seqence can be constructed by 2. And we don't have to look forward either for 3, because the same sequence can also start with 2.
+> So we can totally skip the element whose previous element appeared in the Hashset, which means every increasing seq started by that element can be constructed by starting with the previous element.
+> Time: O(n) we visited each element exactly once. 2 cases here, `num` is either visited as the start of the increasing seq, or visited during the extension of that increasing seq. If it's in the middle of the ICS, it won't be visited twice since it will be skipped.
+> Space: O(n)
+
+```javascript
+var longestConsecutive = function(nums) {
+    let visited = new Set(nums);
+    let maxCnt = 0;
+    for (let num of nums) {
+        let cnt = 0;
+        if (visited.has(num - 1)) continue;
+        while (visited.has(num)) {
+            cnt++;
+            num++;
+        }
+        maxCnt = Math.max(maxCnt, cnt);
+    }
+    return maxCnt;
+};
+```
+---
+## [brick wall](https://leetcode.com/problems/brick-wall/description/)
+
+1. hashtable
+> cross the least bricks ==> hits the most boundaries
+use a hashtable to map the boundaries to the number of bricks with that boundary.
+
+```javascript
+var leastBricks = function(wall) {
+    let cols = new Map();
+    let maxCnt = 0;
+    for (let row of wall) {
+        let col = 0;
+        for (let i = 0; i < row.length - 1; i++) {
+            col += row[i];
+            cols.set(col, (cols.get(col) || 0) + 1);
+            maxCnt = Math.max(maxCnt, cols.get(col));
+        }
+    }
+    return wall.length - maxCnt;
+};
+```
+---
+## [palindrom pairs](https://leetcode.com/problems/palindrome-pairs/description/)
+
+> The basic idea is to check each word for prefixes (and suffixes) that are themselves palindromes. If you find a prefix that is a valid palindrome, then the suffix reversed can be paired with the word in order to make a palindrome. It’s better explained with an example.
+
+> words = ["bot", "t", "to"]
+> Starting with the string “bot”. We start checking all prefixes. If "", "b", "bo", "bot" are themselves palindromes. The empty string and “b” are palindromes. We work with the corresponding suffixes (“bot”, “ot”) and check to see if their reverses (“tob”, “to”) are present in our initial word list. If so (like the word to"to"), we have found a valid pairing where the reversed suffix can be prepended to the current word in order to form “to” + “bot” = “tobot”.
+
+ > Note that when considering suffixes, we explicitly leave out the empty string to avoid counting duplicates. That is, if a palindrome can be created by appending an entire other word to the current word, then we will already consider such a palindrome when considering the empty string as prefix for the other word.
+
+ ```javascript
+ var palindromePairs = function(words) {
+    let map = new Map();
+    for (let i = 0; i < words.length; i++) map.set(words[i], i);
+    let pairs = [];
+
+    for (let [word, idx] of map) {
+        let n = word.length;
+        for (let i = 0; i <= n; i++) {
+            let prefix = word.slice(0, i);
+            let suffix = word.slice(i);
+            if (isPalin(prefix)) {
+                suffix = suffix.split('').reverse().join('');
+                if (suffix !== word && map.has(suffix)) {
+                    pairs.push([map.get(suffix), idx]);
+                }
+            }
+            // avoid prefix = '' , suffix = word
+            // prefix = word , suffix = ''
+            if (i < n && isPalin(suffix)) {
+                prefix = prefix.split('').reverse().join('');
+                if (prefix !== word && map.has(prefix)) {
+                    pairs.push([idx, map.get(prefix)]);
+                }
+            }
+        }
+    }
+
+    return pairs;
+};
+
+function isPalin(s) {
+    return s.split('').reverse().join('') === s;
+}
+```
+---
+## [Array nesting](https://leetcode.com/problems/array-nesting/description/)
+
+> 按照nesting的规则，N个index可以被划分为several 连通分量，我们只需要计算每个连通分量的cnt就可以了
+> 用visited数组记录已经被访问过index，只更新连通分量当中首次被访问到的那个index的cnt
+
+```javascript
+var arrayNesting = function(nums) {
+    let cntMap = new Map();
+    function S(i) {
+        if (cntMap.has(i)) return cntMap.get(i);
+        let cnt = 0, visited = new Set();
+        for (; !visited.has(i); i = nums[i]) {
+            cnt++;
+            visited.add(i);
+        }
+        for (let j of visited) cntMap.set(j, cnt);
+        return cnt;
+    }
+
+    let longest = 0;
+    for (let i = 0; i < nums.length; i++) longest = Math.max(longest, S(i));
+    return longest;
+};
+
+arrayNesting = function(nums) {
+    let visited = new Set();
+    let longest = 0;
+    for (let i = 0; i < nums.length; i++) {
+        if (visited.has(i)) continue;
+        let cnt = 0;
+        while (!visited.has(i)) {
+            cnt++;
+            visited.add(i);
+            i = nums[i];
+        }
+        longest = Math.max(longest, cnt);
+    }
+    return longest;
 };
 ```

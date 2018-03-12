@@ -86,3 +86,95 @@ topKFrequent = function(words, k) {
     return topK.reverse();
 };
 ```
+---
+## [h index](https://leetcode.com/problems/h-index/description/)
+
+1. Comparison Sort
+
+> it's pretty hard to understand the definition of the H-index:
+
+> A scientist has index h if h of his/her N papers have at least h citations each, and the other N − h papers have no more than h citations each
+
+> The second half of the definition seems useless but it's not. We can easily find h = 1, which means 1 of his paper has at least 1 citation, but the second half enforce the rest of his paper as at most 1 citation, which means this author really sucks.
+
+> As illustrated in the solution https://leetcode.com/problems/h-index/solution/ .
+> H-index is the last paper that has citations greater than or equal to the total number of paper so far (scanning left to right).
+
+> Since the paper is sorted in decending order, if the `h-th` paper has citations more than h, then the previous papers all have citations more than h, (which means there are at h papers that have citations more than h, we satisfy the first half of the definition).
+
+> Why is H-index the last paper that has citations >= h ? because the rest of the paper `N - h` has citation <= h . If we did not pick the last paper, then there might be paper from `[h + 1, N]` that has citation > h.
+
+2. Counting sort
+
+> in our problem, the keys are the citations of each paper which can be much larger than the number of papers nn. It seems that we cannot use counting sort. The trick here is the following observation:
+
+> Any citation larger than N can be replaced by N and the h-index will not change after the replacement
+
+```javascript
+var hIndex = function(citations) {
+    let n = citations.length;
+    // comparison sort descending order
+    citations.sort((a, b) => b - a);
+    // find hIndex
+    let hIndex = 0;
+    for (let i = 0; i < n; i++) {
+		// num of papers so far = i + 1
+        if (citations[i] >= i + 1) hIndex = i + 1;
+    }
+
+    return hIndex;
+};
+
+var hIndex = function(citations) {
+    let n = citations.length;
+    let cnts = countCitations(citations);
+    let hCnt = 0;
+    for (let h = n; h >= 0; h--) {
+        hCnt += cnts[h];
+				// hCnt === # of paper with citation >= h
+        // 剩下的 paper citation 都 < h
+        if (hCnt >= h) return h;
+    }
+    return 0;
+};
+
+function countCitations(citations) {
+    let n = citations.length;
+    let counter = new Array(n + 1).fill(0);
+
+        // counting # of papers for each citation number
+    for (let cite of citations) {
+        counter[Math.min(n, cite)]++;
+    }
+    return counter;
+}
+```
+---
+## [h index II](https://leetcode.com/problems/h-index-ii/description/)
+
+1. Binary Search
+> Use binary search to find the smallest idx i, so that `citation[i] >= n - i` . `[0: i)` has `i` papers, `[i: n)` has `n - i` papers.
+> 可以把 `n - mid` 理解为可能的hIndex，hIndex尽可能大意味着i要尽可能小
+>  如果`citation[mid] < n - mid` 那么右边paper的citation即使全部大于 `n - mid` 也凑不齐 `n - mid` 篇paper。所以这个时候只能认怂，右移i，减小hindex。
+>  如果 `citation[mid] === n - mid` 那么显然符合hIndex定义
+>  如果 `citation[mid] > n - mid` 那么 它有可能是hIndex，当前面的paper都比较烂的时候，他也有可能不是hIndex，当前面的paper水平稍微次一点的时候。不管如何都应该保留其作为候选
+>  随意目标是选出第一个 满足 `citation[mid] >= n - mid` 的mid， `n - mid`就是其index . 如果不存在，则hIndex为0
+
+```javascript
+var hIndex = function(citations) {
+    let n = citations.length;
+    let lo = 0, hi = n - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (citations[mid] >= n - mid) {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    //bug1: return n - lo;
+    return citations[lo] >= n - lo ? n - lo : 0;
+};
+```
+
+---
