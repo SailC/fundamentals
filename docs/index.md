@@ -1,17 +1,8 @@
-# ICP content demos
+# 硅谷之路启航
 
-This repo contains a set of interview algorithm & system design questions.
+淡泊以明志
+宁静而致远
 
-## Objective
-
-- sort the questions in different categories and companies.
-
-## Demo Lists
-
-- Linkedin
-- Thumbtack
-- Facebook
-- [Google](Google/index.html)
-
-## Timeline
-- 02/16 google LC explore questions
+1. [算法题](./algorithm)
+2. [系统设计](./system-design)
+3. [项目介绍]()
