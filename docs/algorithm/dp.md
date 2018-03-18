@@ -7,7 +7,8 @@
 2. dp
 > `dp[i] = Math.max(dp[i - 1] + nums[i - 1], nums[i - 1]);`
 
-```javascript
+```
+#!/bin/bash
 var maxSubArray = function(nums) {
     let n = nums.length;
     //let dp = new Array(n + 1).fill(0);

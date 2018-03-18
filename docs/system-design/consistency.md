@@ -23,6 +23,7 @@ we considered the example of ensuring that a username is unique and rejecting co
 consensus means deciding something in such a way that all nodes agree on what was decided, and such that the decision is irrevocable.
 
 Such equivalent problems include:
+
 1. Linearizable compare-and-set registers
 2. Atomic transaction commit
 3. Total order broadcast

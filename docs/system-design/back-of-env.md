@@ -58,6 +58,48 @@ Handy metrics based on numbers above:
 
 ![](https://camo.githubusercontent.com/77f72259e1eb58596b564d1ad823af1853bc60a3/687474703a2f2f692e696d6775722e636f6d2f6b307431652e706e67)
 
+#### Handy conversion guide:
+
+* 2.5 million seconds per month
+* 1 request per second = 2.5 million requests per month
+* 40 requests per second = 100 million requests per month
+* 400 requests per second = 1 billion requests per month
+
+#### 审题 indication
+- read write ratio 100: 1 -> read heavy
+
+
+#### before you scale
+**Important: Do not simply jump right into the final design from the initial design!**
+
+State you would 1) **Benchmark/Load Test**, 2) **Profile** for bottlenecks 3) address bottlenecks while evaluating alternatives and trade-offs, and 4) repeat.  See [Design a system that scales to millions of users on AWS](./design-scalable-system.md) as a sample on how to iteratively scale the initial design.
+
+It's important to discuss what bottlenecks you might encounter with the initial design and how you might address each of them.  For example, what issues are addressed by adding a **Load Balancer** with multiple **Web Servers**?  **CDN**?  **Master-Slave Replicas**?  What are the alternatives and **Trade-Offs** for each?
+
+We'll introduce some components to complete the design and to address scalability issues.  Internal load balancers are not shown to reduce clutter.
+
+#### datastore 的性能
+* MySQL / PosgreSQL 等 SQL 数据库的性能
+    * 约 1k QPS 这个级别
+* MongoDB / Cassandra 等 硬盘型NoSQL 数据库的性能
+    * 约 10k QPS 这个级别 (
+* Redis / Memcached 等 内存型NoSQL 数据库的性能
+    * 100k ~ 1m QPS 这个级别
+
+以上数据根据机器性能和硬盘数量及硬盘读写 度会有区别
+
+nginx物理服务器上空跑20w+qps，我就没见过谁超过过。加上1MB静态页面估计只会胜得更多。700qps是个假nginx吧。
+
+#### 系统特征
+
+* 用户系统
+    * 读多写少
+    * 一个读多写少的系统，一定要使用cache进行优化, 可以使用 Memcache
+    * 写操作很少，意味着 从QPS的角度来说，一台 MySQL 就可以搞定了
+    * 进一步的问题，如果读写操作都很多，怎么办?
+    * 使用更多的数据库服务器分摊流量
+    * 使用像 Redis 这样的读写操作都很快的 Cache-through 型 Database
+
 #### Source(s) and further reading
 
 * [Latency numbers every programmer should know - 1](https://gist.github.com/jboner/2841832)

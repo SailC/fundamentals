@@ -136,3 +136,11 @@ laser is creating a huge sub group , (every time it scales down , things turns b
 
 https://ibm-watson.slack.com/archives/C2MHVQQCD/p1511423761000061
 https://ibm-watson.slack.com/archives/C3NAY7FSQ/p1520302198000049
+
+---
+
+1. 平时工作的时候如何做贡献？
+2. 怎么自动化
+3. 如果有效troubleshoot
+4. 如何monitor system
+5. 分布式cache如何实现
