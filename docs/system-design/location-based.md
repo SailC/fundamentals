@@ -1,4 +1,4 @@
-# location based service
+# design Uber
 
 ## geohash
 
@@ -38,3 +38,93 @@ GeoHash就是一种将经纬度转换成字符串的方法，并且使得在大�
         * 6位 geohash 的精度已经在一公里以内，对于 Uber 这类应用足够了
         * 4位 geohash 的精度在20公里以上了，再大就没意义了，你不会打20公里以外的车
     * key = 9q9hvt, value = set of drivers in this location
+
+----
+
+## Step 1: Outline use cases and constraints
+
+### Use cases (ask interviewer)
+* **Rider** post a trip matching request, and found a matching driver
+    * **Driver** can accept or decline the match
+* **Driver** update his current location to the **Service**
+
+### Constraints
+* 假设问到 20 万司机 同时在线
+* uber driver needs to update their location every 4s
+
+### Load parameters
+* QPS
+    * write QPS = 200k / 4 = 50k write QPS
+    * peak write QPS = 3 * 50k = 150k
+    * compared to write QPS, read QPS can be ignored because rider won't have to update their locaitons so frequently
+* Storage
+    * 假如每条Location都记录：200 k * 86400 / 4 * 100bytes (每条位置记录）~ 0.5 T / 天
+    * 假如只记录当前位置信息：200 k * 100 bytes = 20 M
+
+
+* [handy conversion](back-of-env/#handy-conversion-guide)
+
+---
+## Step 2: Design core components
+
+#### Services
+* **Rider** post a trip matching request, and found a matching driver
+    1. rider post a trip matching request
+    2. `matching svc` creates a new trip record , mark trip status as `waiting`.
+        * return the tripId to the client so it can use that to poll the server about the maching status
+    3. `matching svc` asks `location svc` for the driver location data,
+        * (lat,lng) → geohash → [driver_ID1, driver_ID2, …]
+        * 先查6位的 geohash༌找0.6公里以内的
+        * 如果没有༌再查5位的 geohash༌找2.4公里以内的
+        * 如果没有༌再查4位的 geohash༌找20公里以内的
+    4. `matching svc` asks `ranking svc` to get the best driver available for the current trip
+        * `matching svc` sends trip info to the driver, drive can either accept or reject
+        * if reject, go back to step 4, excluding the current driver
+        * otherwise proceed to step5
+    5. `matching svc` set the Driver status to be unavailable and set the trip status as `on-going`.
+    6. `matching svc` return the trip info to both rider & driver.
+
+* **Driver** update his current location to the **Service**
+    1. driver post a location update (lat, lon)
+    2. `location svc` receive the update and store the the redis location datastore
+        * 计算当前位置 lat, lng的geohash (geohash4, geohash5, geohash6 ...)
+        * 查询自己原来所在的位置, 对比是否发生变化, 并将变化的部分在 Redis 中进行修改
+        * 在Driver Table中更新自己的最后活跃时间
+    3. `location svc` updates the driver table (lat, lon) in the mySQL db
+
+
+*
+
+#### DB & schema
+
+![](../images/5.jpeg)
+
+---
+
+## Step 4: Scale the design
+
+
+#### QPS high, server down
+需求是150k QPS, Redis 的读写效率 > 100 QPS 是不是1-2台就可以了？What about redis server down?
+
+DB starding to avoid single point of failure and distribute the load across cluster.
+
+#### how to shard (sharding key)
+* we can use geohash as sharding key, but there would be too many / few partitions if the geohash bit isn't choosen correctly.
+* we can use the user's city as the sharding key
+* for city 0 -> 100, check if the current location is inside the city .
+* sharding key : city_id
+* redis key: <city_id:geohash>
+
+#### 乘客站在两个城市的边界上怎么办？
+* 找到乘客周围的2-3个城市
+* 这些城市不能隔太远以至于车太远
+* 汇总多个城市的查询结果
+* 这种情况下司机的记录在存哪个城市关系不大
+
+#### How to check rider is in Airport?
+分为两级Fence查询，先找到城市，再在城市中查询Airport Fence
+
+#### How to reduce impact on db crash?
+- master-slave replication (as partition has already alleviate the write pressue)
+- leader-less replication (need to worry more about the consistency)

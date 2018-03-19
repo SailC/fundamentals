@@ -1,3 +1,5 @@
+# tiny url
+
 ## Reference
 
 [http://blog.gainlo.co/index.php/2016/03/08/system-design-interview-question-create-tinyurl-system/](http://blog.gainlo.co/index.php/2016/03/08/system-design-interview-question-create-tinyurl-system/)
@@ -42,18 +44,25 @@
 
 ## REST API
 
-1. GET - Expand a short URL
-  - Request `GET [https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS](https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS)`
-  - Response
+* GET - Expand a short URL
 
-      {
-       "kind": "urlshortener#url",
-       "id": "http://goo.gl/fbsS",
-       "longUrl": "http://www.google.com/",
-       "status": "OK"
-      }
+```
+    - Request
 
-1. POST - Shorten a long URL
+        GET https://www.googleapis.com/urlshortener/v1/url?shortUrl=http://goo.gl/fbsS
+
+    - Response
+
+        {
+         "kind": "urlshortener#url",
+         "id": "http://goo.gl/fbsS",
+         "longUrl": "http://www.google.com/",
+         "status": "OK"
+        }
+```
+
+* POST - Shorten a long URL
+```
   - Request
 
       POST https://www.googleapis.com/urlshortener/v1/url
@@ -62,12 +71,12 @@
       {"longUrl": "http://www.google.com/"}
 
   - Response
-
       {
        "kind": "urlshortener#url",
        "id": "http://goo.gl/fbsS",
        "longUrl": "http://www.google.com/"
       }
+```
 
 - see [https://developers.google.com/url-shortener/v1/getting_started#actions](https://developers.google.com/url-shortener/v1/getting_started#actions) for more details
 
@@ -202,16 +211,15 @@ We can start with 20% of daily traffic and based on clients’ usage pattern we 
 When the cache is full, and we want to replace a link with a newer/hotter URL, how would we choose? Least Recently Used (LRU) can be a reasonable policy for our system
 
 - How can we partition the database when the we are running out of cache resources?
-  1. Key range partition . Easy to create uneven distribution, which leads to bottleneck.
-  1. Hash partition
-- we can continue using the global incremental id.
-  - for GET request, a shortUrl is decoded to a global id , and we can mod that id to the total number of db machines and find the db machine.
-  - for POST request, we broadcast the longURL to all the db machines and check if it exist.
-  - we can use a single machine to maintain that global incremental id , but this will create bottleneck. Adding standby machines makes the system more complicated.
+    1. Key range partition . Easy to create uneven distribution, which leads to bottleneck.
+    2. Hash partition we can continue using the global incremental id.
+        - for GET request, a shortUrl is decoded to a global id , and we can mod that id to the total number of db machines and find the db machine.
+        - for POST request, we broadcast the longURL to all the db machines and check if it exist.
+        - we can use a single machine to maintain that global incremental id , but this will create bottleneck. Adding standby machines makes the system more complicated.
 - Can we get away without using global incremental id?
-  - We add a extra partition character in the shortURL to indicate the db machine which has the mapping.
-  - for GET request, the parition id is parsed from shortURL and that points to the db machine.
-  - for POST request, use consistent hash to map the longURL to one of the db machine, we the incremental id of that machine to generate shortURL and insert the db machine id to the first character of the shortURL.
+    - We add a extra partition character in the shortURL to indicate the db machine which has the mapping.
+    - for GET request, the parition id is parsed from shortURL and that points to the db machine.
+    - for POST request, use consistent hash to map the longURL to one of the db machine, we the incremental id of that machine to generate shortURL and insert the db machine id to the first character of the shortURL.
 - How to rebalance the mapping distribution when new machiens comes in ?
   - Find the machine who owns the largest range and split it into half. The new machine takes a half of the range.
 
@@ -256,108 +264,3 @@ If `GET`  request returns a  `301 permanent redirection` , The client/browser wo
 1. Database sharding
 
 ---
-
-David
-
-[https://www.interviewcake.com/question/java/url-shortener](https://www.interviewcake.com/question/java/url-shortener)
-
-There are 2 ways to go about this:
-
-1. Brainstorm issues then revise
-
-  2.  Brainstorm design goals, then design around the design goals
-
-# W**hat are we building? (Problem)**
-
-We are building a site that shortens a url given a normal url string. The shortened url will typically have something along the lines of [bit.ly/a12bc](http://bit.ly/a12bc)
-
-# **What features might we need? (Features)**
-
-We will need an api to encode and decode the url to start.
-
-*We should question the interviewer for details as we start going along with our thinking*
-
-**Q for Interviewer:**
-
-- Is this api going to be open or closed (Require developer secrets/keys)?
-  - If yes, we will need to add a developer key parameter in our api
-- Can people delete the links? Do they persist forever?
-  - If yes, add an api to delete the links
-  - If no, we must have some policies in place for links:
-    1. Remove links we created a certain time length ago (Time)
-    1. Remove links that are not visited (Frequency)
-  - Auto generated link? Choose your own?
-  - Analytics?
-
-# Design Goals (Constraints)
-
-Come up with a system that:
-
-- Stores lots of links
-- Redirecting a shortlink should be fast
-- Resilient to load spikes
-
-# Data Model
-
-    // Link:
-    //	- shortLink: slug
-    //	- longLink:  destination
-
-    // Psuedocode for API:
-
-    // Link for get slug
-    // we want linkto be something like: [bit.ly/v1/shortLink](http://bit.ly/v1/shortLink)
-
-    // Example:
-    $ curl --data '{"destination": "mywebpagetoshorten.com"}' https://bit.ly/api/v1/shortlink
-    {
-      "slug": "ae8uFt",
-      "destination": "mywebpagetoshorten.com"
-    }
-
-    // Endpoint
-    public Response shortlink(Request request) {
-        if (request.method() != HttpMethod.POST) {
-            return new Response(HttpStatus.ERROR501);  // 501 NOT IMPLEMENTED
-        }
-
-        String destination = request.getData().getDestination();
-        String slug = request.getData().getSlug();
-
-        // if the request did not include a slug, make a new one
-        if (slug == null) {
-            slug = generateRandomSlug();
-        }
-
-        DB.insertLink(slug, destination);
-
-        String responseBody = String.format("{'slug':'%s'}", slug);
-
-        return new Response(HttpStatus.OK200, responseBody);
-    }
-
-    // On client end:
-    // Redirect the response
-    function redirect(request) {
-        var destination = DB.getLinkDestination(request.path);
-        return response(302, destination);
-    }
-
-# Implementing Unique Links
-
-We can have n^c combinations of links where c is the length of the link and n is the variations for each character. Given that these characters need to be in urls, we should only use alphanumeric characters [a-zA-Z0-9] = 26 + 26 + 10 = 62
-
-How many short urls do we need to accomodate? - ask interviewer, or  - estimate:
-
-Assume upperbound of QPS: 20 links per second * 60 * 60 * 24 * 365= 640M, stores for 5 years = 3T
-
-Look online for what 62^c = 3T ——>  6.9 = 7. Thus our length can be around 7
-
-We can generate new links through a random generator that pulls from aphanumeric characters. What happens when we hit a conflict though?
-
-1. We can re-roll
-1. Better yet, increase by 1 and convert to base 62
-
-# Web server architecture
-
-Have a standard db with caching for more popular websites.

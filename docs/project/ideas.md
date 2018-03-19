@@ -64,6 +64,7 @@ https://w3-connections.ibm.com/blogs/WatsonArchitecture/entry/Watson_Architectur
 https://w3-connections.ibm.com/blogs/WatsonArchitecture/entry/Approaches_to_Moving_Faster?lang=en_us
 
 * jenkins v.s. message que decoupling ?
+What is the right timeout before the leader is declared dead? A longer timeout means a longer time to recovery in the case where the leader fails. However, if the timeout is too short, there could be unnecessary failovers. For example, a temporary load spike could cause a node’s response time to increase above the timeout, or a network glitch could cause delayed packets. If the system is already struggling with high load or network problems, an unnecessary failover is likely to make the situation worse, not better.
 
 ---
 
