@@ -156,3 +156,371 @@ findDuplicateSubtrees = function(root) {
 };
 ```
 ---
+## [populating next right pointers in each node](https://leetcode.com/problems/populating-next-right-pointers-in-each-node/description/)
+```
+Given the following perfect binary tree,
+         1
+       /  \
+      2    3
+     / \  / \
+    4  5  6  7
+After calling your function, the tree should look like:
+         1 -> NULL
+       /  \
+      2 -> 3 -> NULL
+     / \  / \
+    4->5->6->7 -> NULL
+
+```
+
+```javascript
+var connect = function(root) {
+    if (!root) return;
+    if (root.left) root.left.next = root.right;
+    if (root.right && root.next) root.right.next = root.next.left;
+    connect(root.left);
+    connect(root.right);
+};
+```
+---
+
+## [populating next right pointers in each node II](https://leetcode.com/problems/populating-next-right-pointers-in-each-node-ii/description/)
+
+```
+先画图，然后遍历本层的linked list的同时构建下一层的linked list。
+构建完毕之后，遍历下一层的linked list，一直到没有下一层为止。
+
+初始条件本层的linkedlist就是一个root节点
+```
+
+```javascript
+var connect = function(root) {
+    while (root) {
+        let head = new TreeLinkNode();
+        let cur = head;
+        for (let node = root; node; node = node.next) {
+            if (node.left) {
+                cur.next = node.left;
+                cur = cur.next;
+            }
+            if (node.right) {
+                cur.next = node.right;
+                cur = cur.next;
+            }
+        }
+        root = head.next;
+    }
+};
+```
+---
+
+## [sum of left leaves](https://leetcode.com/problems/sum-of-left-leaves/description/)
+
+```
+need to know whether a node is a left leaf.
+use prev to point to the last traversed node.
+const isLeftLeaf = isLeaf && prev.left = node
+```
+
+```javascript
+var sumOfLeftLeaves = function(root) {
+    if (!root) return 0;
+    let prev = null, sum = 0;
+    const isLeaf = node => !node.left && !node.right;
+    function preorder(node) {
+        if (!node) return;
+        if (isLeaf(node) && prev && prev.left === node) sum += node.val;
+        prev = node;
+        preorder(node.left);
+        preorder(node.right);
+    }
+    preorder(root);
+    return sum;
+};
+
+var sumOfLeftLeaves = function(root) {
+    if (!root) return 0;
+    let stack = [root];
+    let prev = null;
+    let sum = 0;
+    const isLeaf = node => !node.left && !node.right;
+    while (stack.length > 0) {
+        let node = stack.pop();
+        if (isLeaf(node) && prev && prev.left === node) sum += node.val;
+        if (node.right) stack.push(node.right);
+        if (node.left) stack.push(node.left);
+        prev = node;
+    }
+    return sum;
+};
+```
+
+----
+
+## [average levels in binary tree](https://leetcode.com/problems/average-of-levels-in-binary-tree/description/)
+
+```
+Input:
+    3
+   / \
+  9  20
+    /  \
+   15   7
+Output: [3, 14.5, 11]
+Explanation:
+The average value of nodes on level 0 is 3,  on level 1 is 14.5, and on level 2 is 11. Hence return [3, 14.5, 11]
+```
+
+```javascript
+var averageOfLevels = function(root) {
+    let result = [];
+    if (!root) return [];
+    let que = [root];
+    while (que.length > 0) {
+        let sum = que.reduce((acc, node) => (acc + node.val), 0);
+        result.push(sum / que.length);
+        let nextQue = [];
+        for (let node of que) {
+            if (node.left) nextQue.push(node.left);
+            if (node.right) nextQue.push(node.right);
+        }
+        que = nextQue;
+    }
+    return result;
+};
+```
+
+---
+
+## [binary tree vertical order traversal](https://leetcode.com/problems/binary-tree-vertical-order-traversal/description/)
+
+```
+`bfs traversal + col info for each nodes`
+use map to map the col index to the list of nodes.
+
+can't use dfs here as there is level oder requirement in each col array
+```
+
+```javascript
+var verticalOrder = function(root) {
+    let map = new Map(); //key: idx val: [val]
+    if (root === null) return [];
+    let que = [[root, 0]];
+    while (que.length > 0) {
+        let nextQue = [];
+        for (let cur of que) {
+            let [node, col] = cur;
+            if (!map.has(col)) map.set(col, []);
+            map.get(col).push(node.val);
+            if (node.left) nextQue.push([node.left, col - 1]);
+            if (node.right) nextQue.push([node.right, col + 1]);
+        }
+        que = nextQue;
+    }
+
+    let keys = [...map.keys()].sort((a, b) => a - b);
+    return keys.map(key => map.get(key));
+};
+```
+---
+
+## [lowest common ancestor of a bst](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-search-tree/description/)
+
+```javascript
+var lowestCommonAncestor = function(root, p, q) {
+    if (!root) return null;
+    if (root.val > Math.max(p.val, q.val)) return lowestCommonAncestor(root.left, p, q);
+    if (root.val < Math.min(p.val, q.val)) return lowestCommonAncestor(root.right, p, q);
+    return root;
+};
+```
+
+---
+
+## [lowest common ancestor of a binary tree](https://leetcode.com/problems/lowest-common-ancestor-of-a-binary-tree/description/)
+
+```
+use a helper function to return the node if any of the node is in the subtree.
+
+if both the left & right subtree contains a node, it means p and q are on the two sides of the root node, root is the LCS.
+if p & q are in the same side, recurse to that side.
+```
+
+```javascript
+var lowestCommonAncestor = function(root, p, q) {
+    if (!root) return null;
+    if (root === p) return p;
+    if (root === q) return q;
+    let left = lowestCommonAncestor(root.left, p, q);
+    let right = lowestCommonAncestor(root.right, p, q);
+    if (left && right) return root;
+    return left ? left : right;
+};
+```
+
+---
+
+## [diameter of binary tree](https://leetcode.com/problems/diameter-of-binary-tree/description/)
+
+```
+diameter updated at every node during dfs.
+dfs return the max Number of nodes along on branch for each subtree.
+diameter = max # of node along the left subtree + max #along the right subtree + 1 - 1.
+```
+
+```javascript
+var diameterOfBinaryTree = function(root) {
+    let diameter = 0;
+    function dfs(node) {
+        if (!node) return 0;
+        let leftNodeNum = dfs(node.left),
+            rightNodeNum = dfs(node.right);
+        let nodeNum = 1 + leftNodeNum + rightNodeNum;
+        diameter = Math.max(diameter, nodeNum - 1);
+        return 1 + Math.max(leftNodeNum, rightNodeNum);
+    }
+    dfs(root);
+    return diameter;
+};
+```
+
+---
+
+## [subtree of another tree](https://leetcode.com/problems/subtree-of-another-tree/description/)
+
+> dfs from top down. for each node in s, if it's equal to root in t, then it's a potential match, use `isSame` to check two tree is the same. if not , resort to the left & right of the root in t.
+
+```javascript
+var isSubtree = function(s, t) {
+    if (!s || !t) return !s && !t;
+    if (s.val !== t.val) return isSubtree(s.left, t) || isSubtree(s.right, t);
+    return isSame(s, t) || isSubtree(s.left, t) || isSubtree(s.right, t);
+};
+
+var isSame = function(s, t) {
+    if (!s || !t) return !s && !t;
+    return s.val === t.val && isSame(s.left, t.left) && isSame(s.right, t.right);
+};
+```
+
+---
+
+## [binary tree upside down](https://leetcode.com/problems/binary-tree-upside-down/description/)
+
+1. buttom up transformation
+the new root comes from the bottom recursion
+
+```javascript
+var upsideDownBinaryTree = function(root) {
+    if (!root || !root.left) return root;
+    let newRoot = upsideDownBinaryTree(root.left);
+    let hook = root.left;
+    hook.left = root.right;
+    hook.right = root;
+    root.left = root.right = null;
+    return newRoot;
+};
+```
+---
+
+## [symmetric tree](https://leetcode.com/problems/symmetric-tree/description/)
+
+> topdown comparison
+
+```javascript
+var isSymmetric = function(root) {
+    if (!root) return true;
+    return isSame(root.left, root.right);
+};
+
+function isSame(root1, root2) {
+    if (!root1 || !root2) return !root1 && !root2;
+    return root1.val === root2.val && isSame(root1.left, root2.right) && isSame(root1.right, root2.left);
+}
+```
+
+---
+
+## [max depth of binary tree](https://leetcode.com/problems/maximum-depth-of-binary-tree/description/)
+
+```javascript
+var maxDepth = function(root) {
+    function dfs(node) {
+        if (!node) return 0;
+        return 1 + Math.max(dfs(node.left), dfs(node.right));
+    }
+    return dfs(root);
+};
+```
+
+---
+
+## [find leaves of binary tree](https://leetcode.com/problems/find-leaves-of-binary-tree/description/)
+
+```javascript
+var findLeaves = function(root) {
+    let results = [];
+    function getHeight(root) {
+        if (!root) return -1;
+        let height = 1 + Math.max(getHeight(root.left), getHeight(root.right));
+        if (results[height] === undefined) {
+            results[height] = [];
+        }
+        results[height].push(root.val);
+        return height;
+    }
+    getHeight(root);
+    return results;
+};
+```
+
+---
+
+## [find largest value in each tree row](https://leetcode.com/problems/find-largest-value-in-each-tree-row/description/)
+
+```javascript
+var largestValues = function(root) {
+    let que = root ? [root] : [];
+    let result = [];
+    while (que.length > 0) {
+        result.push(Math.max(...que.map(x => x.val)));
+        let nextQue = [];
+        for (let node of que) {
+            if (node.left) nextQue.push(node.left);
+            if (node.right) nextQue.push(node.right);
+        }
+        que = nextQue;
+    }
+    return result;
+};
+```
+
+---
+
+## [second minimum node in a binary tree](https://leetcode.com/problems/second-minimum-node-in-a-binary-tree/description/)
+
+保留两个最小值，preorder
+如果碰到和这两个最小值一样的数，记得跳过
+
+```javascript
+var findSecondMinimumValue = function(root) {
+    let min = Infinity, secMin = Infinity;
+    function preorder(node) {
+        if (!node) return;
+        if (node.val !== min && node.val !== secMin) {
+            if (node.val < min) {
+                secMin = min;
+                min = node.val;
+            } else if (node.val < secMin) {
+                secMin = node.val;
+            }
+        }
+        preorder(node.left);
+        preorder(node.right);
+    }
+
+    preorder(root);
+
+    return secMin == Infinity ? -1 : secMin;
+};
+```

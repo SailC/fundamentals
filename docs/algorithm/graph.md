@@ -443,3 +443,329 @@ areSentencesSimilarTwo = function(words1, words2, pairs) {
     return true;
 };
 ```
+---
+
+## [clone graph](https://leetcode.com/problems/clone-graph/)
+
+> dfs traverse the nodes
+> for every node, create a copy, and then recursively populate its neighbors by calling clone graph on the neighbors
+
+> `how to dfs`
+> if (node is null) return null, nothing to copy
+> if (node has been visited) all the copy has been done so no need to dfs it again, simply return its copy.
+// this node hasn't been visited yet
+> first create a copy of it. and populate the neighbor of it's copy by dfs through the neighbors.
+> `each dfs does two things`
+> 1. create a copy of the node
+> 2. connect the neighbors via dfs through the neighbors
+
+
+> bfs is more tedious , use map as both representation for edges and visited map. Only push to que the unvisited nodes
+> `how to bfs`
+> each bfs does the similar things copy the nodes if necessary & connect to it's neighbors and bfs through the unvisited neighbors.
+
+```javascript
+var cloneGraph = function(graph) {
+    let map = new Map();
+    function clone(node) {
+        if (!node) return null;
+        if (map.has(node)) return map.get(node);
+        let copyNode = new UndirectedGraphNode(node.label);
+        map.set(node, copyNode);
+        for (let neighbor of node.neighbors) {
+            copyNode.neighbors.push(clone(neighbor));
+        }
+        return copyNode;
+    }
+    return clone(graph);
+};
+
+var cloneGraph = function(graph) {
+    if (!graph) return null;
+    let map = new Map();
+    let que = [graph];
+    while (que.length > 0) {
+        let node = que.shift();
+        if (!map.has(node)) {
+            map.set(node, new UndirectedGraphNode(node.label));
+        }
+        let clonedNode = map.get(node);
+        for (let neighbor of node.neighbors) {
+            if (!map.has(neighbor)) {
+                map.set(neighbor, new UndirectedGraphNode(neighbor.label));
+                que.push(neighbor);
+            }
+            let clonedNeighbor = map.get(neighbor)
+            clonedNode.neighbors.push(clonedNeighbor);
+        }
+    }
+    return map.get(graph);
+};
+```
+
+---
+
+## [graph valid tree](https://leetcode.com/problems/graph-valid-tree/description/)
+
+1. make sure #edge = #node - 1
+2. make sure no cycle
+
+1 + 2 -> every node is connected as a tree
+can use `uf` `dfs` `bfs` to detect cycle
+
+> dfs/bfs graph, 如果存在cycle，那么最后遍历的node数量要小于#node
+`if (visited.has(neighbor)` 要做的是continue而不是return false。
+因为是undirected graph， each edge has two directions。 visited存在的不一定是cycle
+
+> 用uf detect cycle 比较简单，if two nodes share the same connection component already, and they're being connect again, that means there is a cycle.
+
+```javascript
+var validTree = function(n, edges) {
+    // 1) make sure #edge = #node - 1
+    if (edges.length !== n - 1) return false;
+    // 2) make sure no cycle
+    // 1) + 2) => every node is connected as a tree
+    let uf = new UF(n);
+    for (let [u, v] of edges) {
+        if (!uf.union(u, v)) return false;
+    }
+    return true;
+};
+
+class UF {
+    constructor(size) {
+        this.parents = [...Array(size).keys()];
+    }
+    find(x) {
+        return x === this.parents[x] ? x : this.find(this.parents[x]);
+    }
+    union(x, y) {
+        let px = this.find(x), py = this.find(y);
+        if (px === py) return false; //detect cycle
+        this.parents[px] = py;
+        return true;
+    }
+}
+
+
+var validTree = function(n, edges) {
+    if (edges.length !== n - 1) return false;
+    let adjs = createAdjs(n, edges);
+    let visited = new Set();
+    bfs(adjs, 0, visited);
+    return visited.size === n;
+};
+
+var validTree = function(n, edges) {
+    if (edges.length !== n - 1) return false;
+    let adjs = createAdjs(n, edges);
+    let visited = new Set();
+    dfs(adjs, 0, visited);
+    return visited.size === n;
+};
+
+function bfs(adjs, node, visited) {
+    let que = [0];
+    visited.add(0);
+    while (que.length > 0) {
+        let node = que.shift();
+        for (let neighbor of adjs[node]) {
+            if (visited.has(neighbor)) continue;
+            visited.add(neighbor);
+            que.push(neighbor);
+        }
+    }
+};
+
+function dfs(adjs, node, visited) {
+    if (visited.has(node)) return;
+    visited.add(node);
+    for (let neighbor of adjs[node]) {
+        dfs(adjs, neighbor, visited);
+    }
+}
+
+function createAdjs(n, edges) {
+    let adjs = new Array(n).fill(0).map(x => []);
+    for (let [from, to] of edges) {
+        adjs[from].push(to);
+        adjs[to].push(from);
+    }
+    return adjs;
+}
+// 如果 edges # is not constrained, than the general approach of cycle detection
+validTree = function(n, edges) {
+    if (edges.length !== n - 1) return false;
+    let map = new Map();
+    for (let [s, e] of edges) {
+        if (!map.has(s)) map.set(s, new Set());
+        if (!map.has(e)) map.set(e, new Set());
+        map.get(s).add(e);
+        map.get(e).add(s);
+    }
+    let keys = [...map.keys()];
+    let que = keys.length > 0 ? [keys[0]] : [], visited = new Set(que);
+    while (que.length > 0) {
+        let s = que.pop();
+        for (let e of map.get(s)) {
+            if (visited.has(e)) return false;
+            visited.add(e);
+            map.get(e).delete(s);
+            que.push(e);
+        }
+    }
+    return true;
+};
+```
+---
+
+## [acccounts merge](https://leetcode.com/problems/accounts-merge/description/)
+
+> 这题结合了 UF/DFS and hashmap.
+> 2 stages = graph building + dfs each connected component
+or UF building + iterate through connected component
+
+> use email2Name both as a hashmap and a uniq set to start 2nd stage (either dfs or uf)
+> for UF, it's important to have a id distributor to distribute the ids to each email in a round robin fashion.
+
+```javascript
+var accountsMerge = function(accounts) {
+    let adjs = new Map(); //edges of the graph
+    let email2name = new Map();
+    // build the graph and email2name mapping
+    for (let account of accounts) {
+        let name = account.shift();
+        for (let i = 0; i < account.length; i++) {
+            let email1 = account[i];
+            email2name.set(email1, name);
+            for (let j = i + 1; j < account.length; j++) {
+                let email2 = account[j];
+                if (!adjs.has(email1)) adjs.set(email1, new Set());
+                if (!adjs.has(email2)) adjs.set(email2, new Set());
+                adjs.get(email1).add(email2);
+                adjs.get(email2).add(email1);
+            }
+        }
+    }
+    // dfs
+    //let keys = [...adjs.keys()]; //bug1 ajds.keys only contains those nodes with neighbors
+    let merged = [];
+    let visited = new Set();
+    for (let email of email2name.keys()) {
+        if (!visited.has(email)) {
+            let emails = [];
+            dfs(adjs, email, emails, visited);
+            merged.push([email2name.get(email), ...emails.sort()]);
+        }
+    }
+    return merged;
+};
+
+function dfs(adjs, email, emails, visited) {
+    if (visited.has(email)) return;
+    visited.add(email);
+    emails.push(email);
+    //bug2 some nodes are isolated without edges
+    for (let neighbor of (adjs.get(email) || [])) dfs(adjs, neighbor, emails, visited);
+}
+
+class UF {
+    constructor() {
+        this.parent = new Array(10001);
+        for (let i = 0; i <= 10000; i++) this.parent[i] = i;
+    }
+    find(x) {
+        if (this.parent[x] === x) return x;
+        this.parent[x] = this.find(this.parent[x]);
+        return this.parent[x];
+    }
+    union(x, y) {
+        this.parent[this.find(x)] = this.find(y);
+    }
+}
+
+accountsMerge = function(accounts) {
+    let uf = new UF();
+    let email2Name = new Map(), email2ID = new Map();
+    let id = 0;
+    for (let account of accounts) {
+        let name = account.shift();
+        let rootEmail = account[0];
+        for (let email of account) {
+            email2Name.set(email, name);
+            if (!email2ID.has(email)) email2ID.set(email, id++);
+            let [rootId, idx] = [rootEmail, email].map(key => email2ID.get(key));
+            uf.union(rootId, idx);
+        }
+    }
+
+    let merged = new Map();
+    for (let email of email2Name.keys()) {
+        let id = uf.find(email2ID.get(email));
+        if (!merged.has(id)) merged.set(id, []);
+        merged.get(id).push(email);
+    }
+    return [...merged.values()].map(emails => [email2Name.get(emails[0]), ...emails.sort()]);
+};
+```
+
+---
+
+## [alien dictionary](https://leetcode.com/problems/alien-dictionary/description/)
+
+> using toplogical sort.
+> stage1: building the indegree and out edges
+> stage2: topological sort using bfs.
+
+> use both map (char -> a set of src & dests) for indegree & outdegree.
+because during building topology, same edge can appear mutiple times. when two words differ in any of the middle chars, it means we've found an order between the two char, connect them with a directed edge.
+
+> then topological sort the graph and see if we're able to traverse all the nodes without running into a cycle.
+
+```javascript
+var alienOrder = function(words) {
+    let [ins, outs] = buildTopology(words);
+    let que = [];
+    let chars = [...ins.keys()];
+    for (let c of chars) {
+        if (ins.get(c).size === 0) que.push(c);
+    }
+    let order = [];
+    while (que.length > 0) {
+        let c = que.shift();
+        order.push(c);
+        for (let neighbor of outs.get(c)) {
+            ins.get(neighbor).delete(c);
+            if (ins.get(neighbor).size === 0) que.push(neighbor);
+        }
+    }
+    if (order.length === chars.length) return order.join('');
+    return '';
+};
+
+function buildTopology(words) {
+    let ins = new Map(), outs = new Map();
+    for (let word of words) {
+        for (let c of word) {
+            //bug1 same edge can appear mutiple times
+            ins.set(c, new Set());
+            outs.set(c, new Set());
+        }
+    }
+    for (let i = 0; i < words.length; i++) {
+        for (let j = i + 1; j < words.length; j++) {
+            let word1 = words[i], word2 = words[j];
+            for (let k = 0; k < word1.length && k < word2.length; k++) { //bug3 forget to check word2len
+                if (word1[k] !== word2[k]) {
+                    ins.get(word2[k]).add(word1[k]);
+                    outs.get(word1[k]).add(word2[k]);
+                    break; //bug2 forget to break
+                }
+            }
+        }
+    }
+    return [ins, outs];
+}
+```
+
+---

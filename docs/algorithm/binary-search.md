@@ -388,3 +388,311 @@ numMatchingSubseq = function(S, words) {
     return words.filter(isSubseq).length;
 };
 ```
+
+---
+## [search in rotated sorted array](https://leetcode.com/problems/search-in-rotated-sorted-array/description/)
+
+```
+将nums[lo] 和 nums[mid] 进行比较，如果 nums[lo] < nums[mid] 说明 [lo: mid] 递增加有序 可以根据target 在不在这个区间进行二分
+
+当没有dup的时候， while (lo < hi) 这样保证循环内部至少有两个元素，这样在做 lo = mid + 1  or hi = mid - 1  的时候，就至少有一个元素剩下。不会出现 lo > hi  的情况
+当没有dup的时候 nums[lo] === nums[mid] 意味着 lo === mid
+```
+
+```javascript
+var search = function(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (nums[lo] <= nums[mid]) {// lo === mid || nums[lo] < nums[mid]
+            if (target >= nums[lo] && target <= nums[mid]) hi = mid; // mid 和 hi永远不会相当
+            else lo = mid + 1;
+        } else {//nums[lo] > nums[mid] , 不存在 lo === mid 不会引起死循环
+            if (target >= nums[mid] && target <= nums[hi]) lo = mid;
+            else hi = mid - 1;
+        }
+    }
+    return nums[lo] === target ? lo : -1;
+};
+```
+
+---
+## [search in rotated sorted array II](https://leetcode.com/problems/search-in-rotated-sorted-array-ii/description/)
+
+二分内部为了避免讨论 lo, hi, mid之间的重复性，可以使用 `lo + 1 < hi` 保证 lo, hi, mid 不相等
+
+```javascript
+var search = function(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo + 1 < hi) {
+        let mid = ~~((lo + hi) / 2);
+        if (nums[lo] === nums[mid]) {
+            lo++;
+        } else if (nums[lo] < nums[mid]) {
+            if (target >= nums[lo] && target <= nums[mid]) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        } else {
+            if (target >= nums[mid] && target <= nums[hi]) {
+                lo = mid;
+            } else {
+                hi = mid - 1;
+            }
+        }
+    }
+    return target === nums[lo] ? true : (target === nums[hi] ? true : false);
+};
+```
+---
+## [find minimum in rotated sorted array](https://leetcode.com/problems/find-minimum-in-rotated-sorted-array/description/)
+
+* if `nums[lo] < nums[hi]` array are sorted => min = lo
+* if `nums[lo] < nums[mid]` another increasing trend will start at `mid + 1`
+* if `nums[lo] > nums[mid]` mid could be the min element
+
+```javascript
+var findMin = function(nums) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        if (nums[lo] < nums[hi]) return nums[lo];
+        let mid = lo + ~~((hi - lo) / 2);
+        if (nums[lo] <= nums[mid]) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    return nums[lo];
+};
+```
+
+---
+## [Sqrt(x)](https://leetcode.com/problems/sqrtx/description/)
+`有思路` `一遍过`
+
+1. brute force `O(sqrt(x))`
+> for i in [0, x], find the last i so that `i ^ 2 <= x`.
+2. binary search `O(lg(n))`
+> predicate `f(x) <=> x ^ 2 <= target`
+`true, true, true, ..., false, false, false`
+find the last x so that f(x) is true.
+小心`lo = mid` 容易引起死循环
+`mid = lo + ~~((hi - lo + 1) / 2)` to avoid dead loop
+```javascript
+var mySqrt = function(x) {
+    let lo = 0, hi = x;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo + 1) / 2);
+        if (mid * mid > x) {
+            hi = mid - 1;
+        } else {
+            lo = mid;
+        }
+    }
+    return lo;
+};
+```
+---
+
+## [first bad version](https://leetcode.com/problems/first-bad-version/description/)
+
+```
+binary search to find the first bad one.
+if mid is bad, it could be the first bad one so keep it in the search range by `hi = mid`.
+if mid is good, the bad one has yet to come, so exclude mid from the search range by `lo = mid + 1`
+```
+
+```javascript
+var solution = function(isBadVersion) {
+    /**
+     * @param {integer} n Total versions
+     * @return {integer} The first bad version
+     */
+    return function(n) {
+        let lo = 1, hi = n;
+        while (lo < hi) {
+            let mid = ~~((lo + hi) / 2);
+            if (isBadVersion(mid)) {
+                hi = mid;
+            } else {
+                lo = mid + 1;
+            }
+        }
+        return isBadVersion(lo) ? lo: lo + 1;
+    };
+};
+```
+---
+
+## [kth largest element in an array](https://leetcode.com/problems/kth-largest-element-in-an-array/description/)
+
+```
+`quick select`
+quick partion return the ith smallest element from the arr. (starting from 0).
+shuffle the nums can randomize the input and make partition more efficient.
+
+Quickselect is linear-time on average, but it can require quadratic time with poor pivot choices. This is because quickselect is a divide and conquer algorithm, with each step taking O(n) time in the size of the remaining search set. If the search set decreases exponentially quickly in size (by a fixed proportion), this yields a geometric series times the O(n) factor of a single step, and thus linear overall time. However, if the search set decreases slowly in size, such as linearly (by a fixed number of elements, in the worst case only reducing by one element each time), then a linear sum of linear steps yields quadratic overall time (formally, triangular numbers grow quadratically)
+
+the worst case occurs when pivoting on the smallest element at each step, such as applying quickselect for the maximum element to already sorted data and taking the first element as pivot each time.
+```
+
+```javascript
+var findKthLargest = function(nums, k) {
+    let n = nums.length;
+    k = n - k;
+    let lo = 0, hi = n - 1;
+    shuffle(nums);
+    while (lo < hi) {
+        let mid = partition(nums, lo, hi);
+        if (mid === k) return nums[k];
+        if (mid < k) {
+            lo = mid + 1;
+        } else {
+            hi = mid - 1;
+        }
+    }
+    return nums[lo];
+};
+
+function partition(nums, lo, hi) {
+    let i = lo, pivotVal = nums[hi]; // nums[0: i) <= pivotVal
+    for (let j = lo; j < hi; j++) {
+        if (nums[j] <= pivotVal) {
+            [nums[i], nums[j]] = [nums[j], nums[i]];
+            i++;
+        }
+    }
+    [nums[i], nums[hi]] = [nums[hi], nums[i]];
+    return i;
+}
+
+function shuffle(nums) {
+    let n = nums.length;
+    while (n > 1) {
+        let i = ~~(Math.random() * n);
+        [nums[i], nums[n - 1]] = [nums[n - 1], nums[i]];
+        n--;
+    }
+}
+```
+
+---
+
+## [find right interval](https://leetcode.com/problems/find-right-interval/description/)
+
+```javascript
+var findRightInterval = function(intervals) {
+    let result = [];
+    // use hash map to map intervals to its index
+    // because sort will lose the index info
+    let map = createMapping(intervals);
+    // sort the intervals to make binary search possible
+    intervals.sort((int1, int2) => int1.start - int2.start);
+    // for each interval , use binary search to find the right element
+    for (let interval of intervals) {
+        let right = binSearch(intervals, interval.end);
+        result[map.get(interval)] = right ? map.get(right) : -1;
+    }
+    return result;
+};
+
+function createMapping(intervals) {
+    let map = new Map();
+    for (let i = 0; i < intervals.length; i++) {
+        map.set(intervals[i], i);
+    }
+    return map;
+}
+
+// find the first interval.start >= target
+function binSearch(intervals, target) {
+    let lo = 0, hi = intervals.length - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (intervals[mid].start < target) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    return intervals[lo].start >= target ? intervals[lo] : null;
+}
+```
+
+---
+## [Valid Perfect Square](https://leetcode.com/problems/valid-perfect-square/description/)
+
+`一遍过` `binary search`
+
+1. bruteforce O(n)
+> `for (let x = 1; x ^ 2 <= n; x++) if (x ^ 2 === num) return true;`
+2. binary search O(lgn)
+> f(x) = x ^ 2 <= n
+> true, true, true, ..., true, false, false,...
+> find the last true and check if it's the factor.
+
+```javascript
+var isPerfectSquare = function(num) {
+    let lo = 1, hi = num;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo + 1) / 2);
+        if (mid * mid > num) hi = mid - 1;
+        else lo = mid;
+    }
+    return lo * lo === num;
+};
+```
+
+---
+
+## [search for a range](https://leetcode.com/problems/search-for-a-range/description/)
+
+```javascript
+var searchRange = function(nums, target) {
+    return [searchFirst(nums, target), searchLast(nums, target)];
+};
+
+function searchFirst(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (nums[mid] < target) lo = mid + 1;
+        else hi = mid;
+    }
+    return nums[lo] === target ? lo : -1;
+}
+
+
+function searchLast(nums, target) {
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo + 1) / 2);
+        if (nums[mid] > target) hi = mid - 1;
+        else lo = mid;
+    }
+    return nums[lo] === target ? lo : -1;
+}
+```
+
+---
+
+## [find smallest letter greater than target](https://leetcode.com/problems/find-smallest-letter-greater-than-target/description/)
+
+```javascript
+var nextGreatestLetter = function(letters, target) {
+    let lo = 0, hi = letters.length - 1;
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (letters[mid].charCodeAt(0) <= target.charCodeAt(0)) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    if (letters[lo].charCodeAt(0) <= target.charCodeAt(0)) return letters[0];
+    return letters[lo];
+
+};
+```

@@ -40,3 +40,17 @@ var myPow = function(x, n) {
     return n % 2 === 0 ? half * half : half * half * x;
 };
 ```
+
+---
+
+## [sum of square numbers](https://leetcode.com/problems/sum-of-square-numbers/description/)
+
+```javascript
+var judgeSquareSum = function(c) {
+    for (let i = 0; i * i <= c; i++) {
+        let j = Math.sqrt(c - i * i);
+        if (j === ~~(j)) return true;
+    }
+    return false;
+};
+```

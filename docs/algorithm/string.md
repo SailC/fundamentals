@@ -1,3 +1,5 @@
+# string
+
 ## [count and say](https://leetcode.com/problems/count-and-say/description/)
 
 1. Recursion
@@ -296,4 +298,168 @@ var fullJustify = function(words, maxWidth) {
     return result;
 };
 ```
+---
+
+## [implement strstr](https://leetcode.com/problems/implement-strstr/description/)
+
+```
+`edge case` when `needle === '0'`
+
+don't forget to prune the comparison.
+```
+
+```javascript
+var strStr = function(haystack, needle) {
+    let m = haystack.length, n = needle.length;
+    if (m < n) return -1;
+    for(let i = 0; i + n <= m; i++) {
+        if (haystack.slice(i, i + n) === needle) return i;
+    }
+    return -1;
+};
+```
+
+---
+
+## [valid palindrom](https://leetcode.com/problems/valid-palindrome/description/)
+
+```
+igore the nonAlphaNumeric chars by lo++ or hi--.
+if both are valid character and they're different , return false.
+```
+
+```javascript
+var isPalindrome = function(s) {
+    let lo = 0, hi = s.length - 1;
+    const isAlphaDigit = c => /[0-9a-zA-Z]/.test(c);
+    while (lo < hi) {
+        if (!isAlphaDigit(s[lo])) {
+            lo++;
+        } else if (!isAlphaDigit(s[hi])) {
+            hi--;
+        } else {
+            if (s[lo].toLowerCase() !== s[hi].toLowerCase()) {
+                return false;
+            }
+            lo++;
+            hi--;
+        }
+    }
+    return true;
+};
+```
+
+----
+
+## [valid palindrom II](https://leetcode.com/problems/valid-palindrome-ii/description/)
+
+```
+we have one chance to make mismatch.
+
+if there is a mismatch, we delete either one of the char and then see if the rest is palindrome.
+```
+
+```javascript
+var validPalindrome = function(s) {
+    let n = s.length;
+    if (n < 2) return true;
+    if (s[0] === s[n - 1]) return validPalindrome(s.slice(1, n - 1));
+    return isPalindrome(s.slice(1)) || isPalindrome(s.slice(0, n - 1));
+};
+
+function isPalindrome(s) {
+    let lo = 0, hi = s.length - 1;
+    while (lo < hi) {
+        if (s[lo] !== s[hi]) return false;
+        lo++;
+        hi--;
+    }
+    return true;
+}
+
+var validPalindrome = function(s) {
+    return valid(s, 0, s.length - 1, false);
+};
+
+function valid(s, lo, hi, deleted) {
+    if (lo >= hi) return true;
+		//bug1 maintain deleted status
+    if (s[lo] === s[hi]) return valid(s, lo + 1, hi - 1, deleted);
+    return !deleted && (valid(s, lo + 1, hi, true) || valid(s, lo, hi - 1, true));
+}
+```
+
+---
+
+## [one edit distance](https://leetcode.com/problems/one-edit-distance/description/)
+
+```
+`simplify problem`
+make sure s.length < t.length
+
+`edge case` length of two strings differ more than 1.
+
+find the first mismatch.
+and then analyze case by case.
+1) if all chars of s is matched
+2) if mismatch happen somewhere in S.
+2.1) m === n
+2.2) m < n
+```
+
+```javascript
+var isOneEditDistance = function(s, t) {
+    let m = s.length, n = t.length;
+    if (m > n) return isOneEditDistance(t, s);
+    if (n - m > 1) return false;
+    // n - m === 0 || 1
+    let i = 0;
+    while (i < m && s[i] === t[i]) i++;
+    if (i === m) return n - m === 1;
+    // i < m && s[i] !== t[i]
+    if (m < n) return s.slice(i) === t.slice(i + 1);
+    return s.slice(i + 1) === t.slice(i + 1);
+};
+```
+
+---
+
+## [valid number](https://leetcode.com/problems/valid-number/description/)
+
+```
+We start with trimming.
+If we see [0-9] we reset the number flags.
+We can only see . if we didn't see e or ..
+We can only see e if we didn't see e but we did see a number. We reset numberAfterE flag.
+We can only see + and - in the beginning and after an e
+any other character break the validation.
+At the and it is only valid if there was at least 1 number and if we did see an e then a number after it as well.
+```
+
+```javascript
+var isNumber = function(s) {
+    let pointSeen = false, eSeen = false, numSeen = false, numAfterE = false;
+    const isDigit = c => /[0-9]/.test(c);
+    s = s.trim();
+    for (let i = 0; i < s.length; i++) {
+        let c = s[i];
+        if (isDigit(c)) {
+            numSeen = true;
+            if (eSeen) numAfterE = true;
+        } else if (c === '.') {
+            if (pointSeen || eSeen) return false;
+            pointSeen = true;
+        } else if (c === 'e') {
+            if (eSeen || !numSeen) return false;
+            eSeen = true;
+        } else if (c === '+' || c === '-') {
+            if (i > 0 && s[i - 1] !== 'e') return false;
+        } else {
+            return false;
+        }
+    }
+    return numSeen && (!eSeen || numAfterE);
+};
+```
+
 ---

@@ -178,3 +178,243 @@ var hIndex = function(citations) {
 ```
 
 ---
+## [Insert Interval](https://leetcode.com/explore/interview/card/google/63/sorting-and-searching-4/445/)
+`印象深刻` `一遍过` `interval`
+
+1. binary insert the newInterval + merge intervals `O(nlgn)`
+2. left Non-overlap + overlap + right Non-overlap `O(n)`
+> (1) Add the left non-overlapped intervals to the result.
+> (2) Merge the overlapped intervals with the new incoming interval.And push the merged interval to the result.
+> (3) Add the right non-overlapped intervals to the result.
+
+```javascript
+var insert = function(intervals, newInterval) {
+    let i = 0, n = intervals.length;
+    let newIntervals = [];
+    const overlap = (a, b) => !(a.start > b.end || a.end < b.start);
+    while (i < n && intervals[i].end < newInterval.start) newIntervals.push(intervals[i++]);
+    while (i < n && overlap(intervals[i], newInterval)) newInterval = new Interval(Math.min(intervals[i].start, newInterval.start), Math.max(intervals[i++].end, newInterval.end));
+    newIntervals.push(newInterval);
+    while (i < n) newIntervals.push(intervals[i++]);
+    return newIntervals;
+};
+```
+---
+## [Merge Intervals](https://leetcode.com/problems/merge-intervals/description/)
+`印象深刻` `一遍过` `interval`
+
+We try to maintain a merged non-overlappign intervals in the new array as we're processing the input intervals.
+
+1. bruteforce `O(n^2)`
+> For each incoming interval `a` , scan all the already merged `b` intervals.
+> `const overlap = (a, b) => !(a.start > b.end || a.end < b.start);`
+>  (1) If non overlap, add the interval `b` to the next round merged intervals. 放心 Note that if the incomming interval doesn't overlap with interval `b`, then the merged new incomming interval won't overlap with `b` either because of the invariant.
+>  (2) if overlap, create a new incomming interval by merging `a` and `b`
+>  (3) after scanning all, push the new incomming interval to the next round intervals
+
+2. sort `O(nlgn)`
+> 为什么要按照 start sort? 因为这样 只需要考虑 upcomming.start 和 last.end 之间的关系，而不用对之前 interval 逐一判断overlap. O(n ^ 2) => O(nlgn)
+> Maintain an invariant that the result contains merged intervals sorted by starting index. for a incoming interval, only need to consider the last interval because the previous interval is either merged or non overlapped. since new.start > last.start, we only consider the new.start and last.end and see if they're overlapped.
+
+```javascript
+var merge = function(intervals) {
+    intervals.sort((a, b) => a.start - b.start);
+    const overlap = (a, b) => !(a.start > b.end || a.end < b.start);
+    const mergeInt = (a, b) => new Interval(Math.min(a.start, b.start), Math.max(a.end, b.end));
+    let merged = [];
+    for (let interval of intervals) {
+        if (merged.length === 0 || !overlap(interval, merged[merged.length - 1])) {
+            merged.push(interval);
+        } else {
+            let top = merged.pop();
+            merged.push(mergeInt(top, interval));
+        }
+    }
+    return merged;
+};
+```
+
+---
+
+## [meeting room](https://leetcode.com/problems/meeting-rooms/description/)
+
+```
+if there is an overlapp in the meeting time, then a person can't attend all meetings.
+```
+
+```javascript
+var canAttendMeetings = function(intervals) {
+    intervals.sort((interval1, interval2) => interval1.start - interval2.start);
+    for (let i = 0; i < intervals.length; i++) {
+        if (i > 0 && intervals[i].start < intervals[i - 1].end) return false;
+    }
+    return true;
+};
+```
+
+---
+
+## [meeting room II](https://leetcode.com/problems/meeting-rooms-ii/description/)
+
+```
+when do we increase the meeting room, when the new meeting starts before the next existing meeting ends.
+
+if the new meeting starts after the old meeting ends, then the new meeting can use the old room.
+
+`minHeap` O(nlgn)
+we can use a minHeap to store all the existing meetings (tracking the minimum end of the meetings).
+for each new meeting, check the minHeap to see if the earlest ending meeting will end before it begins, if not , we need a new room (put the new meeting in heap). If so, we can share the same room, merge the intervals by updating the end time and put it back to the heap.
+
+`greedy`
+we sort the starting and ending time respectively as we only care about the number of onging meetings at any given point.
+```
+
+![](https://static.notion-static.com/79c61c4e43d94cbd9190b46285d6a84c/Scannable_Document_2_on_Dec_9_2017_at_10_52_01_AM.png)
+
+```javascript
+var minMeetingRooms = function(intervals) {
+    let starts = intervals.map(x => x.start).sort((a, b) => a - b);
+    let ends = intervals.map(x => x.end).sort((a, b) => a - b);
+    let j = 0; //next meeting to finish
+    let minRooms = 0;
+    for (let start of starts) {
+        let nextEnd = ends[j];
+        if (start < nextEnd) minRooms++;
+        else j++;
+    }
+    return minRooms;
+};
+
+minMeetingRooms = function(intervals) {
+    intervals.sort((a, b) => a.start - b.start);
+    let heap = new Heap((a, b) => a.end - b.end);
+    for (let interval of intervals) {
+        if (heap.size === 0) {
+            heap.push(interval);
+        } else {
+            let nextEnd = heap.pop();
+            if (interval.start >= nextEnd.end) {
+                nextEnd.end = interval.end;
+            } else {
+                heap.push(interval);
+            }
+            heap.push(nextEnd);
+        }
+    }
+    return heap.size;
+};
+```
+
+---
+
+## [best meeting point](https://leetcode.com/problems/best-meeting-point/description/)
+
+```
+这道题根本猜不透啊
+怎么也想不到x坐标和y坐标这两个子问题是独立的
+
+曼哈顿距离 (p1, p2) = |p2.x - p1.x| + |p2.y - p1.y|
+
+可以分别求解x坐标的最优解和y坐标的最优解
+然后得到的最优x，y就是出发点
+
+求一维问题的时候可以记录下所有home的位置，sort一下，选middle home，这样在它的左右两边都有同样数量的home，比较省力，不用走非home的节点。
+
+这题是是一维上的best meeting point。 答案是median。需要证明。形式上对应lasso regularization
+
+https://math.stackexchange.com/a/113386 证明
+```
+
+```javascript
+var minTotalDistance = function(grid) {
+    let rows = [], cols = []; //save indexes of homes
+    let m = grid.length;
+    if (m === 0) return 0;
+    let n = grid[0].length;
+    for (let i = 0; i < m; i++) {
+        for (let j = 0; j < n; j++) {
+            if (grid[i][j] === 1) {
+                rows.push(i);
+                cols.push(j);
+            }
+        }
+    }
+    cols.sort((a, b) => a - b);
+    return minDistSum(rows) + minDistSum(cols);
+}
+
+function minDistSum(points) {
+    let target = points[~~(points.length / 2)];
+    return points.reduce((acc, cur) => acc + Math.abs(cur - target), 0);
+}
+```
+
+---
+
+## [median of two sorted array](https://leetcode.com/problems/median-of-two-sorted-arrays/description/)
+
+```
+二分搜索，每次chop off k / 2个元素 hopefully
+
+用递归实现二分搜索，有特殊case
+step1: make sure num1.length <= num2.length
+step2: make sure num1.length > 0
+step3: make sure k > 1
+
+这样可以简化之后的二分
+因为之后的二分保证了 0 < num1.length <= num2.length && k > 1
+
+k > 1 保证了 k / 2 >= 1 也就是num1 至少划分出一个元素
+```
+
+```javascript
+var findMedianSortedArrays = function(nums1, nums2) {
+    let n = nums1.length + nums2.length;
+    if (n % 2 === 0) return (findKth(nums1, nums2, ~~(n / 2)) + findKth(nums1, nums2, ~~(n / 2) + 1)) / 2;
+    return findKth(nums1, nums2, ~~(n / 2) + 1);
+};
+
+const findKth = (nums1, nums2, k) => {
+    if (nums1.length > nums2.length) return findKth(nums2, nums1, k);
+    if (nums1.length === 0) return nums2[k - 1];
+    // 0 < nums1.length <= nums2.length
+    if (k === 1) return Math.min(nums1[0], nums2[0]);
+    let m = Math.min(nums1.length, ~~(k / 2));
+    let n = k - m;
+    if (nums1[m - 1] === nums2[n - 1]) return nums1[m - 1];
+    if (nums1[m - 1] < nums2[n - 1]) return findKth(nums1.slice(m), nums2, k - m);
+    return findKth(nums1, nums2.slice(n), k - n);
+};
+```
+
+---
+
+## [non overlapping intervals](https://leetcode.com/problems/non-overlapping-intervals/description/)
+
+sort the intervals ending position increasing
+maintain a que of non-overlapped intervals
+if overlapped , pick the upcomming interval to remove as it's more likely to overlapped with previous intervals and upcomming intervals
+
+```javascript
+var eraseOverlapIntervals = function(intervals) {
+    let nonOverlap = [];
+    intervals.sort((a, b) => a.end - b.end);
+    for (let interval of intervals) {
+        if (nonOverlap.length === 0 || nonOverlap[nonOverlap.length - 1].end <= interval.start) {
+            nonOverlap.push(interval);
+        }
+    }
+    return intervals.length - nonOverlap.length;
+};
+```
+
+---
+
+为什么要按照 start sort? 因为这样 只需要考虑 upcomming.start 和 last.end 之间的关系，而不用对之前 interval 逐一判断overlap. O(n ^ 2) => O(nlgn)
+
+为什么按照 end sort. 一般考虑到 较大的upcoming.end 会和 future intervals overlap的个数较多，所以通常和greedy结合起来。戳气球，和Non-overlapping intervals 都是
+如果不按end sort，那么先入栈的interval有可能是end比较大的，一个interval就可以在那儿占着茅坑不拉屎不让其他conflicting interval进来。
+
+关于 interval的二分搜索比较蛋疼，可以用bst或者sorted array来存储intervals
+
+---

@@ -16,18 +16,16 @@ system design
 
 ## TODO
 
-- [top K freq](https://soulmachine.gitbooks.io/system-design/content/cn/bigdata/heavy-hitters.html)
-
-- [top 10 freq ip](https://soulmachine.gitbooks.io/system-design/content/cn/top-k-frequent-ip-in-one-hour.html)
-
-6. [top N exception](https://github.com/FreemanZhang/system-design/blob/master/linkedin/topk.md)
+* [top N exception](https://github.com/FreemanZhang/system-design/blob/master/linkedin/topk.md)
+    * [my solution](./top-n-exceptions.md)
     * [map reduce](https://github.com/FreemanZhang/system-design/blob/master/topk.md)
     * service有几百个machine再跑，一段时间内top10 java exception是什么？
     * 把这些monitor service partition
     * idea solution： map reduce，用exception 的signiture来hash做reducer的key.
     * clariy & desc issue
 
-9. [trending shares](http://www.jiuzhang.com/qa/219/)
+* [trending shares](http://www.jiuzhang.com/qa/219/)
+    * [my solution](./trending-shares.md)
     * top N expcetion, linkedin users不停点share， most commonly shraed articles in realtime, (not offline mapreduce)
     * [map reduce](https://github.com/FreemanZhang/system-design/blob/master/topk.md)
     * component:
@@ -37,7 +35,8 @@ system design
         4. some transformation to send notificitons share event to aggregation service  
     * [design a trending topic](http://www.michael-noll.com/blog/2013/01/18/implementing-real-time-trending-topics-in-storm/)
 
-2. distributed blacklist
+* distributed blacklist
+    * [my solution](./monitor.md)
     * [jiuzhang](https://www.jiuzhang.com/qa/6429/)
     * [jiuzhang](https://www.jiuzhang.com/qa/2651/)
     * 不怀好意的server在攻击
@@ -53,9 +52,8 @@ system design
     * how to handle ddos attackers
     * server 挂了怎么办
 
----
-
-1. [hangman game](https://github.com/FreemanZhang/system-design/blob/master/linkedin/hangmanGame.md)
+* [hangman game](https://github.com/FreemanZhang/system-design/blob/master/linkedin/hangmanGame.md)
+    * [mysolution](./hangman.md)
     * 弄一个website， allow player to player hangman， backend frontend，
     * overview diagram
     * UI
@@ -68,16 +66,10 @@ system design
     * scale
     * [jiuzhang](https://www.jiuzhang.com/qa/2655/)
 
-
-3. plazma screen
-    * reception area 看到 new member global app
-    * design a system
-    * junior people (focus data flow, propagate )
-    * followup : 每秒有一个新人注册，如何将这么多backlog member信息stream processing
-    * latency issue
-
-4. [calendering system](https://github.com/FreemanZhang/system-design/blob/master/linkedin/calendar.md)
+* [calendering system](https://github.com/FreemanZhang/system-design/blob/master/linkedin/calendar.md)
+    * [solution](https://www.jiuzhang.com/qa/3498/)
     * [jiuzhang](https://www.jiuzhang.com/qa/5490/)
+    * [stackoverflow](https://stackoverflow.com/questions/12611/designing-a-calendar-system-like-google-calendar)
     * clarify requirement
     * mentioned potential issue
     * register  & create event
@@ -86,32 +78,31 @@ system design
     * how to partition data
     * website , architecture, component, db schema, SQL query
 
-5. document repository
-    * design an index system
+* document repository
+    * [solution](./indexing-system.md)
     * [query cache](https://github.com/donnemartin/system-design-primer/blob/master/solutions/system_design/query_cache/README.md)
     * [design google search engine](https://softwareengineering.stackexchange.com/questions/38324/how-would-you-implement-google-search)
     * [indexing](http://www.ardendertat.com/2011/05/30/how-to-implement-a-search-engine-part-1-create-index/)
     * [another link](http://infolab.stanford.edu/~backrub/google.html)
+    * [how to query](https://stackoverflow.com/questions/6032469/use-of-indexes-for-multi-word-queries-in-full-text-search-e-g-web-search)
 
     * a lot of docs to index, search query -> red & green & !blue ->
     * how to store the index
     * how to optimize (high freq, low freq)
     * multi-part query (先找red & green -> blue, 分层query)
 
-7. spell check
+* spell check
     * [hint](https://www.jiuzhang.com/qa/2263/)
     * 弄一个word processor，有spell checker，打错一个词highlight。
     * warmup 问题
     * follow up 错了之后给realtime suggestion， choose multiple suggestion ranking them, choose which one to display
 
 
----
-
-8. [bitly](./tinyurl.md)
+* [bitly](./tinyurl.md)
     * allocate short urls
     * new url registration 100/s , redirect request 1M/s
 
-10. [autocomplete](./type-ahead.md)
+* [autocomplete](./type-ahead.md)
     * frontend engineer
     * design an architecture for autocomplete system
     * client side component, database schema, js, css

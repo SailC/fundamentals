@@ -1,29 +1,5 @@
 # Google
-## [Sqrt(x)](https://leetcode.com/problems/sqrtx/description/)
-`有思路` `一遍过`
 
-1. brute force `O(sqrt(x))`
-> for i in [0, x], find the last i so that `i ^ 2 <= x`.
-2. binary search `O(lg(n))`
-> predicate `f(x) <=> x ^ 2 <= target`
-`true, true, true, ..., false, false, false`
-find the last x so that f(x) is true.
-小心`lo = mid` 容易引起死循环
-`mid = lo + ~~((hi - lo + 1) / 2)` to avoid dead loop
-```javascript
-var mySqrt = function(x) {
-    let lo = 0, hi = x;
-    while (lo < hi) {
-        let mid = lo + ~~((hi - lo + 1) / 2);
-        if (mid * mid > x) {
-            hi = mid - 1;
-        } else {
-            lo = mid;
-        }
-    }
-    return lo;
-};
-```
 ---
 ## [Sort Transformed Array](https://leetcode.com/problems/sort-transformed-array/description/)
 `无思路` `双指针靠拢` `函数单调性`
@@ -49,62 +25,7 @@ var sortTransformedArray = function(nums, a, b, c) {
     return newArr;
 };
 ```
----
-## [Insert Interval](https://leetcode.com/explore/interview/card/google/63/sorting-and-searching-4/445/)
-`印象深刻` `一遍过` `interval`
 
-1. binary insert the newInterval + merge intervals `O(nlgn)`
-2. left Non-overlap + overlap + right Non-overlap `O(n)`
-> (1) Add the left non-overlapped intervals to the result.
-> (2) Merge the overlapped intervals with the new incoming interval.And push the merged interval to the result.
-> (3) Add the right non-overlapped intervals to the result.
-
-```javascript
-var insert = function(intervals, newInterval) {
-    let i = 0, n = intervals.length;
-    let newIntervals = [];
-    const overlap = (a, b) => !(a.start > b.end || a.end < b.start);
-    while (i < n && intervals[i].end < newInterval.start) newIntervals.push(intervals[i++]);
-    while (i < n && overlap(intervals[i], newInterval)) newInterval = new Interval(Math.min(intervals[i].start, newInterval.start), Math.max(intervals[i++].end, newInterval.end));
-    newIntervals.push(newInterval);
-    while (i < n) newIntervals.push(intervals[i++]);
-    return newIntervals;
-};
-```
----
-## [Merge Intervals](https://leetcode.com/problems/merge-intervals/description/)
-`印象深刻` `一遍过` `interval`
-
-We try to maintain a merged non-overlappign intervals in the new array as we're processing the input intervals.
-
-1. bruteforce `O(n^2)`
-> For each incoming interval `a` , scan all the already merged `b` intervals.
-> `const overlap = (a, b) => !(a.start > b.end || a.end < b.start);`
->  (1) If non overlap, add the interval `b` to the next round merged intervals. 放心 Note that if the incomming interval doesn't overlap with interval `b`, then the merged new incomming interval won't overlap with `b` either because of the invariant.
->  (2) if overlap, create a new incomming interval by merging `a` and `b`
->  (3) after scanning all, push the new incomming interval to the next round intervals
-
-2. sort `O(nlgn)`
-> 为什么要按照 start sort? 因为这样 只需要考虑 upcomming.start 和 last.end 之间的关系，而不用对之前 interval 逐一判断overlap. O(n ^ 2) => O(nlgn)
-> Maintain an invariant that the result contains merged intervals sorted by starting index. for a incoming interval, only need to consider the last interval because the previous interval is either merged or non overlapped. since new.start > last.start, we only consider the new.start and last.end and see if they're overlapped.
-
-```javascript
-var merge = function(intervals) {
-    intervals.sort((a, b) => a.start - b.start);
-    const overlap = (a, b) => !(a.start > b.end || a.end < b.start);
-    const mergeInt = (a, b) => new Interval(Math.min(a.start, b.start), Math.max(a.end, b.end));
-    let merged = [];
-    for (let interval of intervals) {
-        if (merged.length === 0 || !overlap(interval, merged[merged.length - 1])) {
-            merged.push(interval);
-        } else {
-            let top = merged.pop();
-            merged.push(mergeInt(top, interval));
-        }
-    }
-    return merged;
-};
-```
 ---
 ## [Longest Palindromic Substring](https://leetcode.com/explore/interview/card/google/63/sorting-and-searching-4/451/)
 `有思路` `有点生疏` `palindrome` `双指针扩散` `dp`

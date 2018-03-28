@@ -104,6 +104,25 @@ canPartition = function(nums) {
     }
     return dp[n][target];
 };
+
+var canPartition = function(nums) {
+    let n = nums.length;
+    let sum = nums.reduce((acc, cur) => acc + cur, 0);
+    if (sum % 2 !== 0) return false;
+    let target = sum / 2;
+    let dp = new Array(target + 1).fill(false);
+    for (let i = 1; i <= n; i++) {
+        for (let j = target; j >= 0; j--) {
+            if (j === 0) {
+                dp[j] = true;
+            } else {
+                let lastTarget = j - nums[i - 1];
+                dp[j] = dp[j] || (lastTarget >= 0 && dp[lastTarget]);
+            }
+        }
+    }
+    return dp[target];
+};
 ```
 ---
 ## [Partition to K equal Sum subset](https://leetcode.com/problems/partition-to-k-equal-sum-subsets/description/)
@@ -386,6 +405,28 @@ getMoneyAmount = function(n) {
 };
 ```
 ---
+## 0-1-backpack
+
+```javascript
+// Input:
+// Values (stored in array v)
+// Weights (stored in array w)
+// Number of distinct items (n)
+// Knapsack capacity (W)
+// NOTE: The array "v" and array "w" are assumed to store all relevant values starting at index 1.
+
+for j from 0 to W do:
+    m[0, j] := 0
+
+for i from 1 to n do:
+    for j from 0 to W do:
+        if w[i] > j then:
+            m[i, j] := m[i-1, j]
+        else:
+            m[i, j] := max(m[i-1, j], m[i-1, j-w[i]] + v[i])
+```
+---
+
 ## [target sum](https://leetcode.com/problems/target-sum/description/)
 `经典` `dp` `01backpack`
 
@@ -713,6 +754,102 @@ var robI = function(nums, lo, hi) {
     return Math.max(rob, noRob);
 };
 ```
+---
+## [paint house](https://leetcode.com/problems/paint-house/description/)
+
+```javascript
+var minCost = function(costs) {
+    let n = costs.length;
+    let R = 0, G = 0, B = 0;
+    for (let i = 1; i <= n; i++) {
+        let house = i - 1;
+        let [lastR, lastG, lastB] = [R, G, B];
+        R = costs[house][0] + Math.min(lastG, lastB);
+        G = costs[house][1] + Math.min(lastR, lastB);
+        B = costs[house][2] + Math.min(lastR, lastG);
+    }
+    return Math.min(R, G, B);
+
+};
+```
+---
+
+## [paint house II](https://leetcode.com/problems/paint-house-ii/description/)
+
+```
+key observation.
+In order to make decision in the current house, we only need to care about the previous painting decision.
+
+for each house and each color, the minimum cost of painting the house with that color should be the minimum cost of painting previous houses, and make sure the previous house doesn’t paint with the same color.
+
+take R, G, B 3 color for example,
+`R[i] = Min(Min(G[i - 1], B[i - 1]) + cost[R] , ...)`
+return `min(R[n], B[n], G[n])`
+
+`edge case`
+`k === 1` only one color , one house
+```
+
+> an optimization is to save the previous minCost by color instead of looking up in the previous colors.
+> why two min values ? because the current color could be the same as the min color, in that case, we need to use the second smallest min cost color in the previous round
+
+```javascript
+var minCostII = function(costs) {
+    let n = costs.length; //house number
+    if (n === 0) return 0;
+    let k = costs[0].length; //color number
+    if (k === 1) return costs[0][0];
+    let dp = new Array(n + 1).fill(0).map(x => new Array(k).fill(0));
+    for (let i = 1; i <= n; i++) {
+        for (let j = 0; j < k; j++) {
+            let diffCosts = dp[i - 1].filter((_, color) => color !== j);
+            let minCost = Math.min(...diffCosts);
+            dp[i][j] = minCost + costs[i - 1][j];
+        }
+    }
+    return Math.min(...dp[n]);
+};
+
+var minCostII = function(costs) {
+    let n = costs.length; //house number
+    if (n === 0) return 0;
+    let k = costs[0].length; //color number
+    let colors = new Array(k).fill(0);
+    for (let i = 0; i < n; i++) {
+        let lastColors = [...colors];
+        for (let j = 0; j < k; j++) {
+            let diffColors = lastColors.filter((color, index) => index !== j);
+            colors[j] = costs[i][j] + (diffColors.length === 0 ? 0 : Math.min(...diffColors));
+        }
+    }
+    return Math.min(...colors);
+};
+
+var minCostII = function(costs) {
+    if (costs === null || costs.length === 0) return 0;
+    let n = costs.length, k = costs[0].length;
+    if (k === 1) return costs[0][0];
+
+    let min1st = -1, min2nd = -1; //index of the smallerst & second smallest
+    for (let i = 0; i < n; i++) {
+        let [lastMin1st, lastMin2nd] = [min1st, min2nd];
+        [min1st, min2nd] = [-1, -1];
+        for (let j = 0; j < k; j++) {
+            if (i > 0) costs[i][j] += lastMin1st === j ? costs[i - 1][lastMin2nd] : costs[i - 1][lastMin1st];
+            if (min1st === -1 || costs[i][j] < costs[i][min1st]) {
+                min2nd = min1st;
+                min1st = j;
+            } else if (min2nd === -1 || costs[i][j] < costs[i][min2nd]) {
+                min2nd = j;
+            }
+        }
+
+    }
+    return costs[n - 1][min1st];
+
+};
+```
+
 ---
 ## [Delete and earn](https://leetcode.com/problems/delete-and-earn/description/)
 
@@ -1128,8 +1265,8 @@ maxProfit = function(prices) {
     let hold2 = new Array(n + 1).fill(-Infinity);
     let sold2 = new Array(n + 1).fill(0);
     for (let i = 1; i <= n; i++) {
-        hold2[i] = Math.max(hold2[i - 1], hold1[i], sold1[i - 1] - prices[i - 1]);
-        sold2[i] = Math.max(sold2[i - 1], sold1[i], hold2[i - 1] + prices[i - 1]);
+        hold2[i] = Math.max(hold2[i - 1], sold1[i - 1] - prices[i - 1]);
+        sold2[i] = Math.max(sold2[i - 1], hold2[i - 1] + prices[i - 1]);
     }
     return sold2[n];
 };
@@ -1162,10 +1299,10 @@ maxProfit = function(k, prices) {
     let sold = new Array(k + 1).fill(0).map(x => new Array(n + 1).fill(0));
     for (let i = 1; i <= k; i++) {
         for (let j = 1; j <= n; j++) {
-            hold[i][j] = Math.max(hold[i][j - 1], hold[i - 1][j], sold[i - 1][j - 1] - prices[j - 1]);
+            hold[i][j] = Math.max(hold[i][j - 1], sold[i - 1][j - 1] - prices[j - 1]);
         }
         for (let j = 1; j <= n; j++) {
-            sold[i][j] = Math.max(sold[i][j - 1], sold[i - 1][j], hold[i][j - 1] + prices[j - 1]);
+            sold[i][j] = Math.max(sold[i][j - 1], hold[i][j - 1] + prices[j - 1]);
         }
     }
     return sold[k][n];
@@ -1873,6 +2010,96 @@ var maximalSquare = function(matrix) {
 };
 ```
 ---
+## [maximal rectangle](https://leetcode.com/problems/maximal-rectangle/description/)
+
+```
+This is a generic version of `maximal rectangle`
+`dpSum + check`
+use dp to calculate the sum of a rectangle from [0, 0] to [i, j] .
+for each bottom-right corner, check different size of rectangle and see if the rectangle's sum is equal to the area. if so, full of 1s, update the max area.
+
+`running height + histogram`
+iterate row by row, for each row, build the histogram using dp / accumulation. and use histogram to solve the problem.
+```
+
+```javascript
+var maximalRectangle = function(matrix) {
+    if (!matrix || matrix.length === 0 || matrix[0].length === 0) return 0;
+    let m = matrix.length, n = matrix[0].length;
+    let sums = getRectSum(matrix, m, n);
+    let maxArea = 0;
+    const getArea = (x, y, i, j) => (
+        sums[i][j] - sums[x - 1][j] - sums[i][y - 1] + sums[x - 1][y - 1]
+    );
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            for (let x = i; x >= 1; x--) {
+                for (let y = j; y >= 1; y--) {
+                    let area = (i - x + 1) * (j - y + 1);
+                    if (getArea(x, y, i, j) === area) {
+                        maxArea = Math.max(maxArea, area);
+                    }
+                }
+            }
+        }
+    }
+    return maxArea;
+};
+
+function getRectSum(matrix, m, n) {
+    let sums = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(0));
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            sums[i][j] = Number(matrix[i - 1][j - 1]) + sums[i - 1][j] + sums[i][j - 1] - sums[i - 1][j - 1];
+        }
+    }
+    return sums;
+}
+
+var maximalRectangle = function(matrix) {
+    if (matrix.length === 0 || matrix[0].length === 0) {
+        return 0;
+    }
+    let m = matrix.length, n = matrix[0].length;
+    let maxVal = 0;
+    let heights = new Array(n).fill(0);
+    for (let row of matrix) {
+        for (let i = 0; i < n; i++) {
+            if (row[i] === '0') {
+                heights[i] = 0;
+            } else {
+                heights[i] ++;
+            }
+        }
+        maxVal = Math.max(maxVal, largestRectangleArea(heights));
+    }
+    return maxVal;
+};
+```
+
+---
+## [longest continuous increasing subsequence](https://leetcode.com/problems/longest-continuous-increasing-subsequence/description/)
+
+1. `maxEnding`
+> `subarray === continuous subsequence`
+> `continuous` means depending on the previous element, use
+> `dp[i]` to tracker the length of the longest subarray ending at `index i` .
+
+```javascript
+var findLengthOfLCIS = function(nums) {
+    let n = nums.length;
+    if (n === 0) return 0;
+    let len = 1, LIS = 1;
+    for (let i = 1; i < n; i++) {
+        if (nums[i] > nums[i - 1]) len = len + 1;
+        else len = 1;
+        LIS = Math.max(LIS, len);
+    }
+    return LIS;
+};
+```
+
+---
 ## [longest increasing subsequence](https://leetcode.com/problems/longest-increasing-subsequence/description/)
 
 1. `dp O(n^2) maxEnding`
@@ -2293,4 +2520,179 @@ function countFrom(s, lo, hi) {
     }
     return cnt;
 }
+```
+---
+
+## [split array largest sum](https://leetcode.com/problems/split-array-largest-sum/description/)
+
+1. dp
+
+```
+split the array into m non-empty `continuous` subarrays
+`continuous` is the savior --> `running sum`
+
+`recursive subproblem`
+`dp[i][j]` means split `nums[0:i)` into `j` partitions, in all possbile partitions, for each possible partition scheme, find the largest subarray sum, and find the minimum of all the largest subarray sum.
+`dp[i][j] = Min(all partition scheme)`
+            = `Min( Max(dp[k][j - 1], accSum[i] - accSum[k]))` , k in [0, i)
+try to split a partition , and then resort to the subproblem.
+
+`overlap`
+e.g. when `m = 3` , `[7, | 2, 5| ...]` and `[7, 2 | 5 |, ...]` leave the same sub problem,
+
+`edge case`
+`dp[0][0] = 0`, for `Max(dp[k][j - 1], accSum[i] - accSum[k])`,
+`dp[i][j] = Infinity` for `Min(Max...)`.
+
+整体小 === Min(Max(局部小, partition))
+```
+
+```javascript
+var splitArray = function(nums, m) {
+    let n = nums.length;
+    let dp = new Array(n + 1).fill(0).map(x => new Array(m + 1).fill(Infinity));
+    dp[0][0] = 0;
+
+    let accSum = new Array(n + 1).fill(0);
+    for (let i = 1; i <= n; i++) accSum[i] = accSum[i - 1] + nums[i - 1];
+
+    for (let i = 1; i <= n; i++) {
+        for (let j = 1; j <= m; j++) {
+            let sumSplit = Infinity;
+            for (let k = 0; k < i; k++) {
+                sumSplit = Math.min(sumSplit, Math.max(dp[k][j - 1], accSum[i] - accSum[k]));
+            }
+            dp[i][j] = sumSplit;
+        }
+    }
+    return dp[n][m];
+};
+```
+---
+
+## [maximum sum of 3 non overlapping subarrays](https://leetcode.com/problems/maximum-sum-of-3-non-overlapping-subarrays/description/)
+
+```
+`comparison to split array largest sum`
+this one ask for largest sum, we can just add the sum of the subproblem, while in the last question we need to enumerate all the possible partition scheme to find the minimum.
+
+`dp structure`
+dp[k + 1][nums.lengh + 1]
+dp[4][nums.length + 1]
+
+`dp[i][j]` 表示 `nums[0: j)` 可能取得的 max sum of i non-overlapping subarray with size k
+
+`id[i][j]` 表示 `nums[0:j]` 取得max sum of i 的时候的starting index
+
+for each ending position we have two choice:
+get the max sum by adding the current partition `nums[j - k : j)` and reduce the group number by 1.
+or keep the group number by not adding the current partition.
+
+`dp[i][j] = max(dp[i - 1][j -k] + sum[j - k, j), dp[i][j - 1])`
+根据 dp[i][j] 的计算结果，决定 `id[i][j] = id[i - 1][j - k]` 还是 `id[i][j - 1]`
+
+为了避免edge case，采用 n + 1 array
+最后更加idx dparray来寻找start idx
+
+为了使得start idx尽可能向左，当有两种choice的时候，（从左上角或者从左边得到sub solution）尽可能从左边获得，因为这样给向左扩展留下更多 transaction
+```
+
+```javascript
+var maxSumOfThreeSubarrays = function(nums, k) {
+    let n = nums.length;
+    let dp = new Array(4).fill(0).map(x => new Array(n + 1).fill(0));
+    let ids = new Array(4).fill(0).map(x => new Array(n + 1).fill(0));
+    let result = [];
+    let accSum = new Array(n + 1).fill(0);
+    // calculate running sum
+    for (let i = 1; i <= n; i++) accSum[i] = accSum[i - 1] + nums[i - 1];
+    // populate maxSum array & starting index array
+    for (let i = 1; i <= 3; i++) {
+        for (let j = i * k; j <= n; j++) {
+            let sumByAdding = dp[i - 1][j - k] + (accSum[j] - accSum[j - k]);
+            let sumByNoAdding = dp[i][j - 1];
+            if (sumByAdding > sumByNoAdding) {
+                dp[i][j] = sumByAdding;
+                ids[i][j] = j - k;
+            } else {
+                dp[i][j] = sumByNoAdding;
+                ids[i][j] = ids[i][j - 1];
+            }
+        }
+    }
+    // fill the starting index result
+    let start = n;
+    for (let arrNum = 3; arrNum >= 1; arrNum--) {
+        let i = arrNum - 1;
+        result[i] = ids[arrNum][start];
+        start = result[i];
+    }
+    return result;
+};
+```
+---
+
+## [minimum window subsequence](https://leetcode.com/problems/minimum-window-subsequence/description/)
+
+> 这题不能使用sliding window是因为subsequence要求有位置信息，不好表示成为rule
+
+```
+`k = dp[i][j]` 表示 `S[0:i)` 里面的 minimum contiguous substring starts with `k`.
+In other words , `T[0:j)` is a subsequence of `S[k:i)`
+
+Initialization
+`dp[0][j] = -1` , when j > 0, since no such substring in S exists
+`dp[i][0] = i`, since a substring S[i:i) is of length 0, which matches the empty target
+
+Recursive relation:
+`if S[i - 1] === T[j - 1]` if we can find `dp[i - 1][j - 1]`, that means `T[0:j - 1)` is a subseqence of `S[k:i - 1)`,  appending a char to both S and T can another valid subsequence. `dp[i - 1][j - 1]` is always easier to find than `dp[i - 1][j]` so there're less chars to cover.
+`if S[i - 1] !== T[j - 1]` we have to rely on `dp[i - 1][j]` to find the min substring.
+
+Finally we can go through `dp[i][n]` , each window is `S[dp[i][n], i)` , find the minWindow.
+```
+
+```javascript
+var minWindow = function(S, T) {
+    let m = S.length, n = T.length;
+    let dp = new Array(m + 1).fill(0).map(x => new Array(n + 1).fill(-1));
+    for (let i = 0; i <= m; i++) dp[i][0] = i;
+    for (let i = 1; i <= m; i++) {
+        for (let j = 1; j <= n; j++) {
+            if (S[i - 1] === T[j - 1]) {
+                dp[i][j] = dp[i - 1][j - 1];
+            } else {
+                dp[i][j] = dp[i - 1][j];
+            }
+        }
+    }
+    let minStr = '';
+    for (let i = 1; i <= m; i++) {
+        if (dp[i][n] === -1) continue;
+        let len = i - dp[i][n];
+        if (minStr === '' || len < minStr.length) minStr = S.slice(dp[i][n], i);
+    }
+    return minStr;
+};
+```
+
+---
+
+## [maximum product subarray](https://leetcode.com/problems/maximum-product-subarray/description/)
+
+以每个元素为end的最大maxProd中挑最大
+
+```javascript
+var maxProduct = function(nums) {
+    if (nums.length === 0) return 0;
+    let maxProduct = nums[0];
+
+    let lastMax = 1, lastMin = 1;
+    for (let num of nums) {
+        let [_lastMax, _lastMin] = [lastMax, lastMin];
+        lastMax = Math.max(_lastMax * num, _lastMin * num, num);
+        lastMin = Math.min(_lastMax * num, _lastMin * num, num);
+        maxProduct = Math.max(lastMax, maxProduct);
+    }
+    return maxProduct;
+};
 ```

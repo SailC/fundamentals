@@ -632,3 +632,501 @@ multiply = function(A, B) {
     return C;
 };
 ```
+---
+
+## [intersection of two arrays](https://leetcode.com/problems/intersection-of-two-arrays/description/)
+
+```
+1. two hash set => intersection
+2. sort two array + dedup + two pointers
+3. sort two array + binary search
+```
+
+```javascript
+// Two pointers O(nlgN)
+var intersection = function(nums1, nums2) {
+    nums1.sort((a, b) => a - b);
+    nums2.sort((a, b) => a - b);
+    let i = 0, j = 0;
+    let inter = [];
+    while (i < nums1.length && j < nums2.length) {
+        if (i > 0 && nums1[i - 1] === nums1[i]) {
+            i++;
+            continue;
+        }
+        if (j > 0 && nums2[j - 1] === nums2[j]) {
+            j++;
+            continue;
+        }
+        if (nums1[i] === nums2[j]) {
+            inter.push(nums1[i]);
+            i++;
+            j++;
+        }
+        else if (nums1[i] < nums2[j]) i++;
+        else j++;
+    }
+    return inter;
+};
+
+// Binary Search O(nlgn)
+var intersection = function(nums1, nums2) {
+    nums1.sort((a, b) => a - b);
+    nums2.sort((a, b) => a - b);
+    let inter = [];
+    function binarySearch(nums, target) {
+        let lo = 0, hi = nums.length - 1;
+        while (lo < hi) {
+            let mid = lo + ~~((hi - lo) / 2);
+            if (target === nums[mid]) return mid;
+            if (target < nums[mid]) hi = mid - 1;
+            else lo = mid + 1;
+        }
+        return target === nums[lo] ? lo : -1;
+    }
+    for (let i = 0; i < nums1.length; i++) {
+        if (i > 0 && nums1[i] === nums1[i - 1]) continue;
+        let j = binarySearch(nums2, nums1[i]);
+        if (j !== -1) inter.push(nums1[i]);
+    }
+    return inter;
+};
+
+// hashset O(n)
+var intersection = function(nums1, nums2) {
+    let set1 = new Set(nums1);
+    let set2 = new Set(nums2);
+    return [...set1].filter(x => set2.has(x));
+}
+```
+
+---
+
+## [intersection of two arrays II ](https://leetcode.com/problems/intersection-of-two-arrays-ii/description/)
+
+```javascript
+var intersect = function(nums1, nums2) {
+    let cntMap = new Map();
+    for (let num of nums1) cntMap.set(num, (cntMap.get(num) || 0) + 1);
+
+    let result = [];
+    for (let num of nums2) {
+        if ( (cntMap.get(num) || 0) > 0 ) {
+            result.push(num);
+            cntMap.set(num, (cntMap.get(num) || 0) - 1);
+        }
+    }
+
+    return result;
+};
+
+intersect = function(nums1, nums2) {
+    // sort two arrs
+    nums1.sort((a, b) => a - b);
+    nums2.sort((a, b) => a - b);
+    // set two pointers
+    let i = 0, j = 0;
+    let result = [];
+    while (i < nums1.length && j < nums2.length) {
+        if (nums1[i] === nums2[j]) {
+            result.push(nums1[i]);
+            i++;
+            j++;
+        } else if (nums1[i] < nums2[j]) {
+            i++;
+        } else {
+            j++;
+        }
+    }
+    return result;
+};
+```
+
+---
+
+## [intersection of two linked list](https://leetcode.com/problems/intersection-of-two-linked-lists/description/)
+
+```javascript
+var getIntersectionNode = function(headA, headB) {
+    let lenA = 0, lenB = 0;
+    for (let node = headA; node; node = node.next) lenA++;
+    for (let node = headB; node; node = node.next) lenB++;
+    if (lenA > lenB) {
+        [headA, headB] = [headB, headA]; // make sure headA's path is shorter
+        [lenA, lenB] = [lenB, lenA];
+    }
+    for (let i = 0; headB && i < lenB - lenA; headB = headB.next) i++; // headA should be in the same depth has headB
+    while (headA && headB) {
+        if (headA === headB) return headA;
+        headA = headA.next;
+        headB = headB.next;
+    }
+    return null;
+
+};
+```
+
+I 可用hashset来记录两个set，然后求intersection
+也可用sort + two pointers / binary search 来求解
+
+II 运行result有duplicate， hashset就要变成hashmap用来记录剩余可用的相同元素
+同样可以使用two pointer，而且不用判重更简单
+Q. What if the given array is already sorted? How would you optimize your algorithm? If both arrays are sorted, I would use two pointers to iterate, which somehow resembles the merge process in merge sort.
+
+Q. What if nums1's size is small compared to nums2's size? Which algorithm is better?
+Suppose lengths of two arrays are N and M, the time complexity of my solution is O(N+M) and the space complexity if O(N) considering the hash. So it's better to use the smaller array to construct the counter hash.
+Q. What if elements of nums2 are stored on disk, and the memory is limited such that you cannot load all elements into the memory at once?
+Divide and conquer. Repeat the process frequently: Slice nums2 to fit into memory, process (calculate intersections), and write partial results to memory.
+
+对于linked list 这题，先计算高度差，然后将比较高的那个右移直到高度差一样。
+然后同时前进知道相遇或者有一个null
+
+两个排序的数组， 写出intersection and union 两个function.
+Union 直接开一个set，往里面加数
+
+---
+
+## [shortest unsorted continuous subarray](https://leetcode.com/problems/shortest-unsorted-continuous-subarray/description/)
+
+> keep tracker of the occurence of `nums[i] < nums[j]`
+find the left boundary, min[i]
+and the right boundary, max[j]
+
+> The idea behind this method is that the correct position of the minimum element in the unsorted subarray helps to determine the required left boundary. Similarly, the correct position of the maximum element in the unsorted subarray helps to determine the required right boundary.
+
+```javascript
+var findUnsortedSubarray = function(nums) {
+    let sorted = [...nums].sort((a, b) => a - b);
+    let lo = 0, hi = nums.length - 1;
+    while (lo < hi) {
+        if (nums[lo] === sorted[lo]) lo++;
+        else if (nums[hi] === sorted[hi]) hi--;
+        else break;
+    }
+    let len = hi - lo + 1;
+    return len === 1 ? 0: len;
+};
+
+findUnsortedSubarray = function(nums) {
+    let lo = 0, hi = nums.length - 1, max = -Infinity, min = Infinity;
+    //find two boundary
+    while (lo < hi && nums[lo] <= nums[lo + 1]) lo++;
+    if (lo >= hi) return 0;
+    while (nums[hi] >= nums[hi - 1]) hi--;
+    // calc the min &max
+    for (let i = lo; i <= hi; i++) {
+        max = Math.max(max, nums[i]);
+        min = Math.min(min, nums[i]);
+    }
+    // extend the unsorted arr
+    while (lo > 0 && nums[lo - 1] > min) lo--;
+    while (hi < nums.length - 1&& nums[hi + 1] < max) hi++;
+    return hi - lo + 1;
+
+}
+```
+---
+
+## [summary ranges](https://leetcode.com/problems/summary-ranges/description/)
+
+The array is sorted and without duplicates. In such array, two adjacent elements have difference either 1 or larger than 1. If the difference is 1, they should be put in the same range; otherwise, separate ranges.
+
+We also need to know the start index of a range so that we can put it in the result list. Thus, we keep two indices, representing the two boundaries of current range. For each new element, we check if it extends the current range. If not, we put the current range into the list.
+
+Don't forget to put the last range into the list. One can do this by either a special condition in the loop or putting the last range in to the list after the loop.
+
+```javascript
+var summaryRanges = function(nums) {
+    let n = nums.length;
+    if (n === 0) return [];
+    let i = 0, ranges = [];
+    for (let j = 1; j <= n; j++) {
+        if (j === n || nums[j] !== nums[j - 1] + 1) {
+            let len = j - i;
+            if (len === 1) {
+                ranges.push(`${nums[i]}`);
+            } else {
+                ranges.push(`${nums[i]}->${nums[j - 1]}`);
+            }
+            i = j;
+        }
+    }
+    return ranges;
+};
+```
+
+---
+
+## [shortest word distance](https://leetcode.com/problems/shortest-word-distance/description/)
+
+> 1. linear scan + update pointers
+
+``` javascript
+var shortestDistance = function(words, word1, word2) {
+    let dist = Number.MAX_VALUE;
+    let p1 = -1, p2 = -1; // haven't found target word yet
+    for (let i = 0; i < words.length; i++) {
+        let word = words[i];
+        // update pointers if found target
+        if (word === word1) p1 = i;
+        if (word === word2) p2 = i;
+        // update dist if possible
+        if (p1 !== -1 && p2 !== -1) dist = Math.min(dist, Math.abs(p1 - p2));
+    }
+    return dist;
+};
+```
+
+---
+
+## [shortest word distance ii](https://leetcode.com/problems/shortest-word-distance-ii/description/)
+
+> 1. index map + two pointers
+
+```javascript
+var WordDistance = function(words) {
+    this.indexMap = new Map();
+    for (let i = 0; i < words.length; i++) {
+        let word = words[i];
+        if (!this.indexMap.has(word)) this.indexMap.set(word, []);
+        this.indexMap.get(word).push(i);
+    }
+};
+
+WordDistance.prototype.shortest = function(word1, word2) {
+    let [indices1, indices2] = [word1, word2].map(x => this.indexMap.get(x));
+    let minDist = -1;
+    let i = 0, j = 0;
+    while (i < indices1.length && j < indices2.length) {
+        let idx1 = indices1[i], idx2 = indices2[j];
+        if (idx1 < idx2) {
+            if (minDist === -1 || idx2 - idx1 < minDist) minDist = idx2 - idx1;
+            i++;
+        } else {
+            if (minDist === -1 || idx1 - idx2 < minDist) minDist = idx1 - idx2;
+            j++;
+        }
+    }
+    return minDist;
+};
+```
+
+---
+
+## [shortest word distance iii](https://leetcode.com/problems/shortest-word-distance-iii/description/)
+
+1. linear scan, update two points
+> 分类讨论 word1 === word2 && word1 !== word2 的情况
+
+```javascript
+var shortestWordDistance = function(words, word1, word2) {
+    let shortest = Infinity;
+    if (word1 === word2) {
+        let prev = -1;
+        for (let i = 0; i < words.length; i++) {
+            let word = words[i];
+            if (word === word1) {
+                if (prev !== -1) shortest = Math.min(shortest, i - prev);
+                prev = i;
+            }
+        }
+    } else {
+        let p1 = -1, p2 = -1;
+        for (let i = 0; i < words.length; i++) {
+            let word = words[i];
+            if (word === word1) p1 = i;
+            if (word === word2) p2 = i;
+            if (p1 !== -1 && p2 !== -1) shortest = Math.min(shortest, Math.abs(p1 - p2));
+        }
+    }
+    return shortest;
+};
+```
+
+---
+
+## [subarray sum equals k](https://leetcode.com/problems/subarray-sum-equals-k/description/)
+
+1. accSum + hashMap
+
+```javascript
+var subarraySum = function(nums, k) {
+    let n = nums.length;
+    let accSum = 0;
+    let sumMap = new Map();
+    let cnt = 0;
+    sumMap.set(0, 1);
+    for (let i = 0; i < nums.length; i++) {
+        accSum += nums[i];
+        let target = accSum - k;
+        cnt += sumMap.get(target) || 0;
+        sumMap.set(accSum, (sumMap.get(accSum) || 0) + 1);
+    }
+    return cnt;
+};
+```
+
+---
+
+## [subarray product less than k](https://leetcode.com/problems/subarray-product-less-than-k/description/)
+
+1. prodSum + search for letmost prodSum > prod / k
+2. sliding window
+
+```javascript
+var numSubarrayProductLessThanK = function(nums, k) {
+    let cnt = 0;
+    let n = nums.length;
+    let accProd = new Array(n).fill(1);
+    for (let i = 0; i < n; i++) accProd[i] = i === 0 ? nums[i] : (nums[i] * accProd[i - 1]);
+    for (let i = 0; i < n; i++) {
+        if (accProd[i] < k) cnt += i + 1;
+        else {
+            let idx = binSearch(accProd, 0, i - 1, accProd[i] / k);
+            if (idx < i) cnt += i - idx;
+        }
+    }
+    return cnt;
+};
+
+function binSearch(arr, lo, hi, target) {
+    while (lo < hi) {
+        let mid = lo + ~~((hi - lo) / 2);
+        if (arr[mid] <= target) {
+            lo = mid + 1;
+        } else {
+            hi = mid;
+        }
+    }
+    return arr[lo] > target ? lo : lo + 1;
+}
+
+var numSubarrayProductLessThanK = function(nums, k) {
+    if (k <= 1) return 0;
+    let prod = 1, total = 0, i = 0;
+    for (let j = 0; j < nums.length; j++) {
+        prod *= nums[j];
+        while (prod >= k) {
+            prod /= nums[i];
+            i++;
+        }
+        total += j - i + 1;
+    }
+    return total;
+};
+```
+
+---
+
+## [two sum](https://leetcode.com/problems/two-sum/description/)
+`一遍过` `回味`
+
+1. bruteforce
+> for each nums[i], check if there's a num[j] (j > i) that nums[i] + nums[j] === target.
+> if so, return [i, j]
+> Time: O(n^2)
+> space: O(1)
+
+2. hashtable
+> Use hashtable to save the `number to index` mapping
+> Time: O(n)
+> Space: O(n)
+
+```javascript
+var twoSum = function(nums, target) {
+    let map = new Map();
+    for (let i = 0; i < nums.length; i++) {
+        let num = nums[i];
+        if (map.has(target - num)) return [map.get(target - num), i];
+        map.set(num, i);
+    }
+    return -1;
+};
+```
+---
+
+## [two sum II](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/)
+
+```javascript
+var twoSum = function(numbers, target) {
+    let lo = 0, hi = numbers.length - 1;
+
+    while (lo < hi) {
+        let sum = numbers[lo] + numbers[hi];
+        if (sum === target) return [lo + 1, hi + 1];
+        if (sum < target) lo++;
+        else hi--;
+    }
+
+    return [-1, -1];
+
+};
+```
+
+
+---
+## [three sum](https://leetcode.com/problems/3sum/description/)
+
+> 外层循环是以 nums[i] 为第一个元素的3 sum，将第一个解作为uniq解进行skip dup
+> 如果是作为解的第一个元素，那么是依赖相同序列的第一个元素，if (i > 0 && nums[i] === nums[i - 1]) skip
+> 如果是作为解的最后一个元素，依赖相同序列的最后一个元素， if (i < n - 1 && nums[i] === nums[i + 1]) skip
+
+1.Sort + TwoPointers
+> 内层循环以 nums[lo] 作为第一个元素的 2sum，将第一个解作为uniq解进行skip dup
+> Time: O(n ^ 2)
+> Space: O(1)
+
+2.  Sort + HashTable
+> 内层循环以 nums[i] 作为最后一个元素的 2sum，将最后一个解作为uniq解
+> Time : O(n ^ 2)
+> Space: O(n)
+
+
+```javascript
+var threeSum = function(nums) {
+    // sorted array makes it easy to skip duplicates & use two pointers
+    nums.sort((a, b) => a - b);
+    let triplets = [];
+    for (let i = 0; i < nums.length; i++) {
+        if (i > 0 && nums[i] === nums[i - 1]) continue;
+        let doublets = twoSum(nums, i + 1, nums.length - 1, -nums[i]);
+        for (let doublet of doublets) triplets.push([nums[i], ...doublet]);
+    }
+    return triplets;
+};
+
+function twoSum (nums, lo, hi, target) {
+    let visited = new Set();
+    let result = [];
+    for (let i = lo; i <= hi; i++) {
+        if (i < hi && nums[i] === nums[i + 1]) {
+            visited.add(nums[i]);
+            continue;
+        }
+        if (visited.has(target - nums[i])) {
+            result.push([target - nums[i], nums[i]]);
+        }
+        visited.add(nums[i]);
+    }
+    return result;
+}
+
+function twoSum (nums, lo, hi, target) {
+    let result = new Set();
+    let [left, right] = [lo, hi];
+    while (lo < hi) {
+        if (lo > left && nums[lo] === nums[lo - 1]) {
+            lo++;
+            continue;
+        }
+        if (nums[lo] + nums[hi] === target) {
+            result.add([nums[lo++], nums[hi--]]);
+        } else if (nums[lo] + nums[hi] < target) {
+            lo++;
+        } else {
+            hi--;
+        }
+    }
+    return result;
+}
+```

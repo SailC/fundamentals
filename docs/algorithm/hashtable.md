@@ -1,94 +1,3 @@
-## [two sum](https://leetcode.com/problems/two-sum/description/)
-`一遍过` `回味`
-
-1. bruteforce
-> for each nums[i], check if there's a num[j] (j > i) that nums[i] + nums[j] === target.
-> if so, return [i, j]
-> Time: O(n^2)
-> space: O(1)
-
-2. hashtable
-> Use hashtable to save the `number to index` mapping
-> Time: O(n)
-> Space: O(n)
-
-```javascript
-var twoSum = function(nums, target) {
-    let map = new Map();
-    for (let i = 0; i < nums.length; i++) {
-        let num = nums[i];
-        if (map.has(target - num)) return [map.get(target - num), i];
-        map.set(num, i);
-    }
-    return -1;
-};
-```
----
-## [three sum](https://leetcode.com/problems/3sum/description/)
-
-> 外层循环是以 nums[i] 为第一个元素的3 sum，将第一个解作为uniq解进行skip dup
-> 如果是作为解的第一个元素，那么是依赖相同序列的第一个元素，if (i > 0 && nums[i] === nums[i - 1]) skip
-> 如果是作为解的最后一个元素，依赖相同序列的最后一个元素， if (i < n - 1 && nums[i] === nums[i + 1]) skip
-
-1.Sort + TwoPointers
-> 内层循环以 nums[lo] 作为第一个元素的 2sum，将第一个解作为uniq解进行skip dup
-> Time: O(n ^ 2)
-> Space: O(1)
-
-2.  Sort + HashTable
-> 内层循环以 nums[i] 作为最后一个元素的 2sum，将最后一个解作为uniq解
-> Time : O(n ^ 2)
-> Space: O(n)
-
-
-```javascript
-var threeSum = function(nums) {
-    // sorted array makes it easy to skip duplicates & use two pointers
-    nums.sort((a, b) => a - b);
-    let triplets = [];
-    for (let i = 0; i < nums.length; i++) {
-        if (i > 0 && nums[i] === nums[i - 1]) continue;
-        let doublets = twoSum(nums, i + 1, nums.length - 1, -nums[i]);
-        for (let doublet of doublets) triplets.push([nums[i], ...doublet]);
-    }
-    return triplets;
-};
-
-function twoSum (nums, lo, hi, target) {
-    let visited = new Set();
-    let result = [];
-    for (let i = lo; i <= hi; i++) {
-        if (i < hi && nums[i] === nums[i + 1]) {
-            visited.add(nums[i]);
-            continue;
-        }
-        if (visited.has(target - nums[i])) {
-            result.push([target - nums[i], nums[i]]);
-        }
-        visited.add(nums[i]);
-    }
-    return result;
-}
-
-function twoSum (nums, lo, hi, target) {
-    let result = new Set();
-    let [left, right] = [lo, hi];
-    while (lo < hi) {
-        if (lo > left && nums[lo] === nums[lo - 1]) {
-            lo++;
-            continue;
-        }
-        if (nums[lo] + nums[hi] === target) {
-            result.add([nums[lo++], nums[hi--]]);
-        } else if (nums[lo] + nums[hi] < target) {
-            lo++;
-        } else {
-            hi--;
-        }
-    }
-    return result;
-}
-```
 
 ---
 ## [longest word dictionary](https://leetcode.com/problems/longest-word-in-dictionary/description/)
@@ -391,3 +300,69 @@ arrayNesting = function(nums) {
     return longest;
 };
 ```
+
+---
+
+## [isomorphic strings](https://leetcode.com/problems/isomorphic-strings/description/)
+
+use two hash map to represent the mapping from s to t, and t to s.
+if we found a char s[i] map to two different chars in t, or t[i] map to 2 diff chars in s, return false
+
+another way is to use two arrays to store the last seen index of the char s[i] && t[i]. Initially everything is init to 0, (we haven't seen any of the chars yet). If any of the char appears for the first time, we set the seen index as the current index as there's nothing to tell at this point.
+
+if any char appears for the second time or more, we want to make sure the same char doesn't map to two different chars in another string, so just check their indexing arr and see if
+1. the char has been seen in the other array
+2. the previous store position should be the same
+If previously stored positions are different then we know that the fact they're occuring in the current i-th position simultaneously is a mistake.
+
+```javascript
+var isIsomorphic = function(s, t) {
+    let mapS = new Map(), mapT = new Map();
+    for (let i = 0; i < s.length; i++) {
+        if (!mapS.has(s[i])) {
+            mapS.set(s[i], t[i]);
+        } else {
+            if (mapS.get(s[i]) !== t[i]) return false;
+        }
+        if (!mapT.has(t[i])) {
+            mapT.set(t[i], s[i]);
+        } else {
+            if (mapT.get(t[i]) !== s[i]) return false;
+        }
+    }
+    return true;
+};
+
+var isIsomorphic = function(s, t) {
+    let indexS = new Array(256).fill(-1),
+        indexT = new Array(256).fill(-1);
+    for (let i = 0; i < s.length; i++) {
+        let charCodeS = s.charCodeAt(i);
+        let charCodeT = t.charCodeAt(i);
+        if (indexS[charCodeS] !== indexT[charCodeT]) return false;
+        indexS[charCodeS] = i;
+        indexT[charCodeT] = i;
+    }
+    return true;
+};
+```
+
+---
+
+## [palindrome permutation](https://leetcode.com/problems/palindrome-permutation-ii/description/)
+
+```javascript
+var canPermutePalindrome = function(s) {
+    let set = new Set(); //char
+    for (let c of s) {
+        if (set.has(c)) {
+            set.delete(c);
+        } else {
+            set.add(c);
+        }
+    }
+    return set.size <= 1;
+};
+```
+
+---

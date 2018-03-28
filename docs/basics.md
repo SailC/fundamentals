@@ -39,3 +39,30 @@ A	   01000001	   00000000 01000001	01000001
 | 1110xxxx 10xxxxxx 10xxxxxx
 | 11110xxx 10xxxxxx 10xxxxxx 10xxxxxx
 ```
+---
+## regexp
+
+```
+const isAlphaDigit = c => /[0-9a-zA-Z]/.test(c);
+```
+
+## bit operator
+
+```
+Bitwise AND	a & b	Returns a 1 in each bit position for which the corresponding bits of both operands are 1's.
+Bitwise OR	a | b	Returns a 1 in each bit position for which the corresponding bits of either or both operands are 1's.
+Bitwise XOR	a ^ b	Returns a 1 in each bit position for which the corresponding bits of either but not both operands are 1's.
+Bitwise NOT	~ a	Inverts the bits of its operand.
+Left shift	a << b	Shifts a in binary representation b (< 32) bits to the left, shifting in 0's from the right.
+Sign-propagating right shift	a >> b	Shifts a in binary representation b (< 32) bits to the right, discarding bits shifted off.
+Zero-fill right shift	a >>> b	Shifts a in binary representation b (< 32) bits to the right, discarding bits shifted off, and shifting in 0's from the left.
+```
+
+## set get next values
+let i = this.map.get(val).values().next().value;
+
+## splice
+```
+this.arr.splice(idx, 1); //remove arr[idx]
+this.arr.splice(idx, 0, newNum); //add new number to arr[idx]
+```

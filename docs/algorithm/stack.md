@@ -246,3 +246,162 @@ var exclusiveTime = function(n, logs) {
     return result;
 };
 ```
+
+---
+
+## [largest rectangle in histogram](https://leetcode.com/problems/largest-rectangle-in-histogram/description/)
+
+```
+- 每遍历一个element，就有可能开启一个新的rect。将这种可能性的起点存在pStack里面，hStack用来记录这个rect的高度
+- 当新的element比栈顶元素高的时候，可能性保持，入栈。
+- 如果矮，那么pop出那些可能性破灭的元素，计算maxVal。
+- 如果一样高，只用关心之前入栈的可能性就行，所以不用push。
+- 在栈尾添加一个-1来消除特殊情况.
+
+figure out the `starting position` and `ending position` of each incomming element bar.
+1) `if (stack.length === 0 || barHeight > top)` the `starting position` is current index since left bars are all shorter. `ending pos` we don't know yet, resort to future incoming bars
+2) `else if barHeight === top`, we ignore this case since we can count on the previous bar and its ending pos
+3) `else if barHeight < top`, for the bar on the top of the stack, it's starting pos is stored in the stack, it's `ending pos` is the current index, so pop it and calc its area. Continue this process until `barHeight >= top`, now we can push the incoming bar to the stack.
+but ... this incoming bar starting from the pos of the last poped top.
+
+`edge case`
+`[2,1,2]` , when the `1` is pushed to the stack, the `starting position` of `1` is actually the index of the last poped `2`. Because to the left of `2` are all elements smaller than `1` so `1` can't start there.
+```
+
+```javascript
+var largestRectangleArea = function(heights) {
+    heights.push(0);
+    let maxArea = 0, stack = [];
+    for (let i = 0; i < heights.length; i++) {
+        let h = heights[i];
+        let s = i;
+        while (stack.length > 0 && h < stack[stack.length - 1][1]) {
+            let [start, height] = stack.pop();
+            s = start;
+            maxArea = Math.max(maxArea, height * (i - start));
+        }
+        stack.push([s, h]);
+    }
+    return maxArea;
+};
+```
+
+---
+
+## [evaluate reverse polish notation](https://leetcode.com/problems/evaluate-reverse-polish-notation/description/)
+
+basic stack opr
+`const isDigit = token => /[0-9]+/.test(token);`  although it's not strict, by sufficient to tell the digit in this case. digit can start with `-`
+
+```javascript
+var evalRPN = function(tokens) {
+    let stack = [];
+    for (let token of tokens) {
+        if (new Set(['+', '-', '*', '/']).has(token)) {
+            let num2 = stack.pop(), num1 = stack.pop();
+            switch (token) {
+                case '+':
+                    stack.push(num1 + num2);
+                    break;
+                case '-':
+                    stack.push(num1 - num2);
+                    break;
+                case '*':
+                    stack.push(num1 * num2);
+                    break;
+                case '/':
+                    stack.push(~~(num1 / num2));
+                    break;
+                default:
+                    throw 'unsupported opr';
+            }
+        } else stack.push(Number(token));
+    }
+    return stack.pop();
+};
+```
+
+---
+
+## [max stack](https://leetcode.com/problems/max-stack/description/)
+
+push和popMax操作不可能都是O(1) 否则，使用这个操作就可以实现O(n) 的sort
+push为O(1) ， 那么popmax最多为O(logn)
+
+实现为O(n) 和minstack一样维护一个记录着max idx的stack，每次popmax的时候都找到idx釜底抽薪，然后重新构建maxStack
+
+https://discuss.leetcode.com/topic/110018/java-accepted-with-one-stack-and-one-pq O(log) push O(n) pop
+
+用linked list加heap可以做到 push O(lgn), pop O(n) popMax(lgn)
+
+```javascript
+/**
+ * initialize your data structure here.
+ */
+var MaxStack = function() {
+    this.stack = [];
+    this.maxStack = [];
+};
+
+/**
+ * @param {number} x
+ * @return {void}
+ */
+MaxStack.prototype.push = function(x) {
+    this.stack.push(x);
+    if (this.maxStack.length === 0) {
+        this.maxStack.push(0);
+    } else {
+        let idx = this.maxStack[this.maxStack.length - 1];
+        if (x >= this.stack[idx]) {
+            this.maxStack.push(this.stack.length - 1);
+        } else {
+            this.maxStack.push(idx);
+        }
+    }
+};
+
+/**
+ * @return {number}
+ */
+MaxStack.prototype.pop = function() {
+    this.maxStack.pop();
+    return this.stack.pop();
+};
+
+/**
+ * @return {number}
+ */
+MaxStack.prototype.top = function() {
+    return this.stack[this.stack.length - 1];
+};
+
+/**
+ * @return {number}
+ */
+MaxStack.prototype.peekMax = function() {
+    let idx = this.maxStack[this.maxStack.length - 1];
+    return this.stack[idx];
+};
+
+/**
+ * @return {number}
+ */
+MaxStack.prototype.popMax = function() {
+    let idx = this.maxStack[this.maxStack.length - 1];
+    let result = this.stack[idx];
+    this.stack.splice(idx, 1);
+    this.maxStack = [];
+    let localMax;
+    for (let i = 0; i < this.stack.length; i++) {
+        if (i === 0 || this.stack[i] >= localMax) {
+            localMax = this.stack[i];
+            this.maxStack.push(i);
+        } else {
+            this.maxStack.push(this.maxStack[this.maxStack.length - 1]);
+        }
+    }
+    return result;
+};
+
+```
