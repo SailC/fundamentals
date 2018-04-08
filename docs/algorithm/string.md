@@ -323,10 +323,8 @@ var strStr = function(haystack, needle) {
 
 ## [valid palindrom](https://leetcode.com/problems/valid-palindrome/description/)
 
-```
 igore the nonAlphaNumeric chars by lo++ or hi--.
 if both are valid character and they're different , return false.
-```
 
 ```javascript
 var isPalindrome = function(s) {
@@ -353,11 +351,9 @@ var isPalindrome = function(s) {
 
 ## [valid palindrom II](https://leetcode.com/problems/valid-palindrome-ii/description/)
 
-```
 we have one chance to make mismatch.
 
 if there is a mismatch, we delete either one of the char and then see if the rest is palindrome.
-```
 
 ```javascript
 var validPalindrome = function(s) {

@@ -83,6 +83,78 @@ console.log('winner: ', ticTacToe.checkWinner());
 
 ---
 
+## [LRU cache](https://leetcode.com/problems/lru-cache/description/)
+
+![](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/09/146-ep50.png)
+
+```javascript
+class ListNode {
+    constructor(key, val) {
+        this.key = key;
+        this.val = val;
+        this.prev = this.next = null;
+    }
+}
+
+class List {
+    constructor() {
+        this.head = new ListNode();
+        this.tail = new ListNode();
+        [this.head.next, this.tail.prev] = [this.tail, this.head];
+    }
+    insertBack(node) {
+        let [prev, next] = [this.tail.prev, this.tail];
+        [prev.next, node.next] = [node, next];
+        [node.prev, next.prev] = [prev, node];
+    }
+    remove(node) {
+        let [prev, next] = [node.prev, node.next];
+        [prev.next, next.prev] = [next, prev];
+    }
+    removeFront() {
+        let node = this.head.next;
+        this.remove(node);
+        return node;
+    }
+}
+
+var LRUCache = function(capacity) {
+    this.capacity = capacity;
+    this.map = new Map();
+    this.list = new List();
+};
+
+LRUCache.prototype.get = function(key) {
+    if (!this.map.has(key)) return -1;
+    let node = this.map.get(key);
+    this._touch(node);
+    return node.val;
+};
+
+LRUCache.prototype._touch = function(node) {
+    this.list.remove(node);
+    this.list.insertBack(node);
+};
+
+LRUCache.prototype.put = function(key, value) {
+    if (this.map.has(key)) {
+        let node = this.map.get(key);
+        node.val = value;
+        this._touch(node);
+        return;
+    }
+    if (this.map.size === this.capacity) {
+        let node = this.list.removeFront();
+        this.map.delete(node.key);
+    }
+    let node = new ListNode(key, value);
+    this.list.insertBack(node);
+    this.map.set(key, node);
+};
+```
+
+---
+
 ## [LFU cache](https://leetcode.com/problems/lfu-cache/description/)
 
 ![](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/09/460-ep54-2.png)

@@ -1094,3 +1094,63 @@ var numberOfPatterns = function(m, n) {
     return 4 * numberOfPatternsI(m, n, new Set([0])) + 4 * numberOfPatternsI(m, n, new Set([1])) + numberOfPatternsI(m, n, new Set([4]));
 };
 ```
+
+---
+
+## [Letter Case Permutation](https://leetcode.com/problems/letter-case-permutation/description/)
+`有思路` `dfs` `bfs`
+
+```
+Note:
+S will be a string with length at most 12.
+input size较小，推测时间复杂度 `2 ^ n` or `n!`
+```
+
+1. dfs
+> dfs 空间复杂度较小，因为只需要存储当前解的空间
+branch factor = 2
+时间复杂度 `O(n * 2 ^ l)` l is the # of letters. A total of `2 ^ l` new string and for string takes `O(n)` time to construct
+Space complexity `O(n) === stack depth` + `O(n * 2 ^ l) === solution array`.
+
+2. bfs
+> bfs 要存储所有partial solution.
+> bfs max level === n
+
+```javascript
+var letterCasePermutation = function(S) {
+    const isLetter = c => /[a-z]/i.test(c);
+    const toggle = c => /[a-z]/.test(c) ? c.toUpperCase() : c.toLowerCase();
+
+    let perms = [], n = S.length;
+    function dfs(perm, i) {
+        if (i === n) {
+            perms.push(perm.join(''));
+            return;
+        }
+        dfs([...perm, S[i]], i + 1);
+        if (isLetter(S[i])) {
+            dfs([...perm, toggle(S[i])], i + 1);
+        }
+    }
+
+    dfs([], 0);
+    return perms;
+};
+
+ letterCasePermutation = function(S) {
+     let n = S.length;
+     const isLetter = c => /[a-z]/i.test(c);
+     const toggle = c => /[a-z]/.test(c) ? c.toUpperCase() : c.toLowerCase();
+     let que = [''];
+     for (let i = 0; i < n; i++) {
+         let c = S[i];
+         let nextQue = [];
+         for (let prefix of que) {
+            nextQue.push(prefix + c);
+            if (isLetter(c)) nextQue.push(prefix + toggle(c));
+         }
+         que = nextQue
+     }
+     return que;
+ };
+```

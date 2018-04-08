@@ -238,9 +238,7 @@ var merge = function(intervals) {
 
 ## [meeting room](https://leetcode.com/problems/meeting-rooms/description/)
 
-```
 if there is an overlapp in the meeting time, then a person can't attend all meetings.
-```
 
 ```javascript
 var canAttendMeetings = function(intervals) {
@@ -256,7 +254,6 @@ var canAttendMeetings = function(intervals) {
 
 ## [meeting room II](https://leetcode.com/problems/meeting-rooms-ii/description/)
 
-```
 when do we increase the meeting room, when the new meeting starts before the next existing meeting ends.
 
 if the new meeting starts after the old meeting ends, then the new meeting can use the old room.
@@ -267,7 +264,6 @@ for each new meeting, check the minHeap to see if the earlest ending meeting wil
 
 `greedy`
 we sort the starting and ending time respectively as we only care about the number of onging meetings at any given point.
-```
 
 ![](https://static.notion-static.com/79c61c4e43d94cbd9190b46285d6a84c/Scannable_Document_2_on_Dec_9_2017_at_10_52_01_AM.png)
 

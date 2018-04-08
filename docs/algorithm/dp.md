@@ -1223,6 +1223,35 @@ maxProfit = function(prices) {
     return sold;
 };
 ```
+
+---
+## [best time to buy and sell stock with transaction fee](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-transaction-fee/description/)
+
+```javascript
+var maxProfit = function(prices, fee) {
+    //dp[i] = Math.max(dp[i - 1], dp[j] + prices[i] - prices[j] - fee)
+    //dp[i] = Math.max(dp[i - 1], prices[i] + dp[j] - prices[j] - fee)
+    let n = prices.length;
+    let dp = new Array(n).fill(0);
+    let localMax = dp[0] - prices[0] - fee;
+    for (let i = 1; i < n; i++) {
+        dp[i] = Math.max(dp[i - 1], prices[i] + localMax);
+        localMax = Math.max(localMax, dp[i] - prices[i] - fee);
+    }
+    return dp[n - 1];
+};
+
+maxProfit = function(prices, fee) {
+    let hold = -Infinity, sold = 0;
+    for (let price of prices) {
+        let prevHold = hold;
+        hold = Math.max(hold, sold - price);
+        sold = Math.max(sold, prevHold + price - fee);
+    }
+    return sold;
+};
+```
+
 ---
 ## [best time to buy and sell stock III](https://leetcode.com/problems/best-time-to-buy-and-sell-stock-iii/description/)
 

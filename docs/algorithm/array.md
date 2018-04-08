@@ -1071,7 +1071,7 @@ var twoSum = function(numbers, target) {
 > 如果是作为解的第一个元素，那么是依赖相同序列的第一个元素，if (i > 0 && nums[i] === nums[i - 1]) skip
 > 如果是作为解的最后一个元素，依赖相同序列的最后一个元素， if (i < n - 1 && nums[i] === nums[i + 1]) skip
 
-1.Sort + TwoPointers
+1. Sort + TwoPointers
 > 内层循环以 nums[lo] 作为第一个元素的 2sum，将第一个解作为uniq解进行skip dup
 > Time: O(n ^ 2)
 > Space: O(1)

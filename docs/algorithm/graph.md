@@ -69,16 +69,21 @@ canFinish = function(numCourses, prerequisites) {
 > You may assume that there are no duplicate edges in the input prerequisites -> indegree can use course -> cnt (if dup, cnt will not be correct, has to use set)
 
 1. bfs
-> topological sort bfs doesn't have to worry about the loop in the cycle, because if there is a cycle , the nodes within the cycle won't have indegree of 1 so they'll never be added into the que -> which means the traversal won't cover all the nodes in the graph
-> We observe that if a node has incoming edges, it has prerequisites. Therefore, the first few in the order must be those with no prerequisites
+
+ topological sort bfs doesn't have to worry about the loop in the cycle, because if there is a cycle , the nodes within the cycle won't have indegree of 1 so they'll never be added into the que -> which means the traversal won't cover all the nodes in the graph
+
+ We observe that if a node has incoming edges, it has prerequisites. Therefore, the first few in the order must be those with no prerequisites
 
 > Time: O(V + E) ~ O(V ^ 2)
 > space: O(V + E) ~ O(V ^ 2)
 
 2. dfs
-> 如果检测出环，则没有topology
-> 如果没有检测出环，则按照后序遍历存储visited的 node，最后将他们reverse。后续遍历的好处是确保这个node所有的children都visit过, 没有后顾之忧。preorder的话你不清楚child node的情况，不敢贸然决定sorted的order
-> 拓扑排序之后的最后几个node必定不是作为别人prereq的course，否则，他们的后续课程一定比他们排序的后. 所以我们在退栈的时候将node mark一下成visited。
+
+ 如果检测出环，则没有topology
+
+ 如果没有检测出环，则按照后序遍历存储visited的 node，最后将他们reverse。后续遍历的好处是确保这个node所有的children都visit过, 没有后顾之忧。preorder的话你不清楚child node的情况，不敢贸然决定sorted的order
+
+ 拓扑排序之后的最后几个node必定不是作为别人prereq的course，否则，他们的后续课程一定比他们排序的后. 所以我们在退栈的时候将node mark一下成visited。
 
 ![thought](http://zxi.mytechroad.com/blog/wp-content/uploads/2017/12/210-ep133.png)
 
@@ -447,22 +452,25 @@ areSentencesSimilarTwo = function(words1, words2, pairs) {
 
 ## [clone graph](https://leetcode.com/problems/clone-graph/)
 
-> dfs traverse the nodes
-> for every node, create a copy, and then recursively populate its neighbors by calling clone graph on the neighbors
+dfs traverse the nodes
+for every node, create a copy, and then recursively populate its neighbors by calling clone graph on the neighbors
 
-> `how to dfs`
-> if (node is null) return null, nothing to copy
-> if (node has been visited) all the copy has been done so no need to dfs it again, simply return its copy.
+`how to dfs`
+if (node is null) return null, nothing to copy
+if (node has been visited) all the copy has been done so no need to dfs it again, simply return its copy.
+
 // this node hasn't been visited yet
-> first create a copy of it. and populate the neighbor of it's copy by dfs through the neighbors.
-> `each dfs does two things`
-> 1. create a copy of the node
-> 2. connect the neighbors via dfs through the neighbors
+first create a copy of it. and populate the neighbor of it's copy by dfs through the neighbors.
+
+`each dfs does two things`
+1. create a copy of the node
+2. connect the neighbors via dfs through the neighbors
 
 
-> bfs is more tedious , use map as both representation for edges and visited map. Only push to que the unvisited nodes
-> `how to bfs`
-> each bfs does the similar things copy the nodes if necessary & connect to it's neighbors and bfs through the unvisited neighbors.
+bfs is more tedious , use map as both representation for edges and visited map. Only push to que the unvisited nodes
+
+`how to bfs`
+each bfs does the similar things copy the nodes if necessary & connect to it's neighbors and bfs through the unvisited neighbors.
 
 ```javascript
 var cloneGraph = function(graph) {

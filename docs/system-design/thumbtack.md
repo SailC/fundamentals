@@ -119,26 +119,16 @@ Trie实现auto complete （太累，写错了。。。）
 
 onsite:
 
-1.system design
+1. third party email sender
 
-third party email sender
+2. serialize and deserialize n-ary tree
 
-2. algorthm
+3. if-tdf
 
-serialize and deserialize n-ary tree
+4. trie
 
-3. algorthm
-
-if-tdf
-
-4. algorthm
-
-trie
-
-补充内容 (2016-9-20 14:31):
 第三题是tf-idf，写错了
 
-补充内容 (2016-9-20 14:35):
 第四题是type-ahead design + algorithm，也问了怎么存，很多怎么办，让写trie的class，和里面的function
 
 ---
@@ -151,3 +141,42 @@ trie
 可能是最后一轮的原因，test 中tick调用时间没设计好，跑了多次才有结果。
 
 ---
+
+- [email sender1](https://medium.com/naukri-engineering/email-sending-architecture-using-messaging-queue-314a18f8595c)
+- [email sender2](http://blog.mailgun.com/set-up-message-queue-asynchronous-sending/)
+
+---
+
+When we use web interface with a browser, Gmail does not create, import or store duplicate messages.  Gmail only stores a single copy of any message. If another messages arrives which is a true duplicate - i.e. has the same Message ID as another - the new message will be discarded on arrival.
+
+The problem is with the domains that have not been crawled yet. For example if there is 1000 domains in the queue that have not been crawled. Any of those links could be added again, and again and again. Which swells my SQS to hundreds of thousands of messages that is mostly duplicates.
+
+Most of the time your messages will be handed to one of your consumers once, but you will run into duplicates at some stage.
+
+I don't think there is an easy answer to this question, because it entails coming up with a proper architecture that can cope with duplicates, meaning it's idempotent in nature.
+
+If all the workers in your distributed architecture were idempotent, it would be easy, because you wouldn't need to worry about duplicates. But in reality, that sort of environment does not exist, somewhere along the way something will not be able to handle it.
+
+---
+
+- [link1](https://stackoverflow.com/questions/37472129/using-many-consumers-in-sqs-queue)
+- [link2](https://stackoverflow.com/questions/23260024/how-to-prevent-duplicate-sqs-messages)
+
+---
+
+In “Fault Tolerance” we encountered an idea called exactly-once (or effectively-once) semantics. If something goes wrong while processing a message, you can either give up (drop the message—i.e., incur data loss) or try again. If you try again, there is the risk that it actually succeeded the first time, but you just didn’t find out about the success, and so the message ends up being processed twice.
+
+One of the most effective approaches is to make the operation idempotent (see “Idempotence”); that is, to ensure that it has the same effect, no matter whether it is executed once or multiple times. However, taking an operation that is not naturally idempotent and making it idempotent requires some effort and care: you may need to maintain some additional metadata (such as the set of operation IDs that have updated a value), and ensure fencing when failing over from one node to another (see “The leader and the lock”).
+
+THE LEADER AND THE LOCK
+Frequently, a system requires there to be only one of some thing. For example:
+
+Only one node is allowed to be the leader for a database partition, to avoid split brain (see “Handling Node Outages”).
+
+Only one transaction or client is allowed to hold the lock for a particular resource or object, to prevent concurrently writing to it and corrupting it.
+
+Only one user is allowed to register a particular username, because a username must uniquely identify a user.
+
+---
+
+- [js event settimeout](https://johnresig.com/blog/how-javascript-timers-work/)

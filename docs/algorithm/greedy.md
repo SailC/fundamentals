@@ -1,8 +1,8 @@
 ## [task scheduler](https://leetcode.com/problems/task-scheduler/description/)
 `有思路` `代码脏` `greedy` `math` `simulation`
 
-![1](./images/1.png)
-![2](./images/2.png)
+![1](../images/1.png)
+![2](../images/2.png)
 
 1. priority que simulation
 > 贪心： 尽可能调度cnt比较大的task，这样可以有效填充cooling period。如果调度cnt较小的task，那么会导致cnt较大的task积累，不利于分散task种类。尽可能保留多种task好互相interleave。
