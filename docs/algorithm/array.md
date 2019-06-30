@@ -1043,6 +1043,18 @@ var twoSum = function(nums, target) {
     return -1;
 };
 ```
+```go
+func twoSum(nums []int, target int) []int {
+    visited := make(map[int]int)
+    for i, num := range nums {
+        if j, ok := visited[target - num]; ok {
+            return []int{j, i}
+        }
+        visited[num] = i
+    }
+    return nil
+}
+```
 ---
 
 ## [two sum II](https://leetcode.com/problems/two-sum-ii-input-array-is-sorted/description/)

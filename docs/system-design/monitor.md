@@ -45,16 +45,18 @@ Rate Limiting helps to protect services against abusive behaviors targeting the 
 
 * 查询是否超过限制
     * 代码：
-    ```
-    for t in 0~59 do
-    key = event+feature+(current_timestamp – t)
-    sum+= memcahed.get(key, default=0)
-    ```
-    * Check sum is in limitation
-      解释：把最近1分钟的访问记录加和
+
+```
+for t in 0~59 do
+  key = event+feature+(current_timestamp – t)
+  sum+= memcahed.get(key, default=0)
+
+```
+
+* 解释：把最近1分钟的访问记录加和
 
 ### what to return
-Rate Limiting is a process that is used to define the rate and speed at which consumers can access APIs. Throttling is the process of controlling the usage of the APIs by customers during a given period. Throttling can be defined at the application level and/or API level. When a throttle limit is crossed, the server returns “429” as HTTP status to the user with message content as “Too many requests”.
+Rate Limiting is a process that is used to define the rate and speed at which consumers can access APIs. Throttling is the process of controlling the usage of the APIs by customers during a given period. Throttling can be defined at the application level and/or API level. When a throttle limit is crossed, the server returns [429](https://developer.mozilla.org/en-US/docs/Web/HTTP/Status/429) as HTTP status to the user with message content as “Too many requests”.
 
 ### 对于一天来说，有86400秒，检查一次就要 86k 的 cache 访问，如何优化？
 
@@ -99,6 +101,153 @@ A right approach could be to do both per-IP and per-user rate limiting, as they 
 
 ### what if rate limiter server 挂了？
 use leader less server , sacrifice accuracy (concurrent writes) for availability
+
+## Thumbtack Rate limiting
+Initial scoping of the problem: “We have a service with a public endpoint, and we’ve been finding that malicious users are hitting that endpoint, and in fact flooding it with HTTP requests. We’d like a rate limiting system to mitigate these attacks, while still allowing regular traffic to flow without problems.”  This is initially left vague so we can see how the candidate scopes out the problem.
+
+### Common Questions
+* Where the rate limiter will be (in the load balancer machine, on a web server, etc).
+    * Avoid the ‘system architecture’ part, focus on "a function that can be called to allow/block a request based on predefined rate"
+* What unit will be used for limiting?
+    * requests/second
+* How should extra requests be handled?
+    * Requests that exceed the rate can be dropped.
+* If the candidate presents a solution that involves storing / queuing the requests, question them closely on the time/space complexity of their solution.
+* Do we need to limit by user/machine/IP?
+    * Yes, that would be great!  How would you limit by client?  (A map from id → limiter?)
+
+### Simple Solution Setup
+
+A simple approach to this problem is to increment the counter every time a successful request comes through, check the counter before returning true/false, and reset or decrement the counter over time.  The candidate may spend some time exploring other possible rate limiting strategies, and may need to be guided towards the naive solution to get started.  
+
+* If the candidate suggests storing the timestamp for each request (ie a list/queue of every request timestamp), this should lead to a conversation about time/space complexity of their proposal.
+    * A successful candidate should identify that certain cases would require iterating through all stored information and removing many items.  What is item removal cost of <your_chosen_datastructure>?
+* "Is there another solution that would not require storing information about each request?"
+    * What if we just keep a counter of requests?
+    * When would the counter need to be changed/decremented/incremented?
+* Resetting the counter to 0 every second results in very spiky behavior.
+    * A good candidate might realize this when asked to draw or describe the volume of requests over time.
+    * This can be improved by keeping track of the elapsed time and reducing the counter by (rate * elapsed)
+    * Candidates should be encouraged to implement a solution using elapsed time, if they do not get there themselves.
+* Some candidates may gravitate towards having a separate thread or timer which decrements the counter, they should be encouraged to seek a simpler, non-threaded solution if possible.
+* Some explanation of "system time" (aka epoch, unix time, now(), POSIX time) may be necessary, and candidates pointed towards the appropriate library. (time.time() in Python, System.currentTimeMillis() in Java, ...)
+
+```
+class RateLimiter {
+public:
+    // rate is an integer num requests per second
+    RateLimiter(int rate) {
+    }
+
+    bool IsAllowed() {
+       //implement this
+    }
+}
+```
+
+Once the candidate has completed their initial pass, I like to have them write their own tests.  Good candidates will jump into testing without being prompted.  There are at least two valid strategies:  
+
+1. Use sleep() to simulate time passing between test calls. and
+2. Structure the code such that time can be injected into the function.
+
+Basic test case:
+
+1. Set rate to 10 req/s.  Call isAllowed() 10 times, verify all calls succeed.
+2. Call isAllowed() again, verify calls fail.
+3. Wait some time.
+4. Call isAllowed() again, verify calls pass.
+
+### Bursting
+If the candidate has made it this far and written a good set of tests, I will ask something along the lines of ‘ok, so we have a way of rate limiting to say, 20 r/s, but what if we want to allow for 200 r/s, but a long term average of 20 r/s (ie, we now allow ‘bursts’ of requests). Some candidates may move towards two separate limiting systems.
+
+This will generally work, but again, the space complexity here becomes worrying (if we want to average out 20 r/s over an hour, we possibly need to keep 20 * 3600 request ‘times’ per person).  While discussing this, I’ll either try to lead them to token bucket limiting, or even just give a quick explanation of it (see if they understand why it’s clever).  The general idea of token bucket is that there is a bucket which starts full. The number of tokens in the bucket is the burst capacity.  Every time a request is allowed, a token is removed from the bucket.  Periodically, tokens are added back into the bucket (this is the rate).  The analogy can be reversed to start with an empty bucket if it makes more sense to you, just remain consistent.
+
+```
+import time
+
+class RateLimiter(object):
+    def __init__(self, rate, capacity):
+        """
+        @param capacity:
+        @param rate: number of requests / second to allow
+        """
+        self.tokens = 0
+        self.capacity = capacity
+        self.rate = rate
+        self.last_update = time.time()
+
+    def is_allowed(self):
+        """
+        @return: boolean
+        """
+        self._update()
+        self.tokens += 1
+        if self.tokens > self.capacity:
+            self.tokens = self.capacity
+            return False
+        print("Allowed Request. Current Tokens: {}".format(self.tokens))
+        return True
+
+    def _update(self):
+        elapsed = time.time() - self.last_update
+        adjustment = int(elapsed * self.rate)
+        # do not allow tokens to drop below 0
+        self.tokens = max(0, self.tokens - adjustment)
+        if adjustment != 0:
+            print("Removed {} tokens.  New size: {}".format(adjustment, self.tokens))
+            self.last_update = time.time()
+
+
+def add_some(total, delay=0):
+    """
+    test function to add tokens to a bucket.
+    optionally, with a delay
+    return the number of successful requests
+    """
+    allowed = 0
+    for i in range(total):
+        time.sleep(delay)
+        if limiter.is_allowed():
+            allowed += 1
+        else:
+            print("Blocked.  Current Tokens: {}".format(limiter.tokens))
+    print("Allowed: {} / {}".format(allowed, total))
+    return allowed
+
+print("test basic rate")
+limiter = RateLimiter(rate=10, capacity=10)
+assert(add_some(10) == 10)
+time.sleep(1)
+assert(add_some(20) == 10)
+time.sleep(1)
+
+print("test bursting to capacity")
+limiter = RateLimiter(rate=10, capacity=20)
+assert(add_some(20) == 20)
+time.sleep(1)
+assert(add_some(20) == 10)
+time.sleep(1)
+
+print("test with constant delay")
+limiter = RateLimiter(rate=5, capacity=5)
+assert(add_some(20, 0.1) == 15)
+```
+
+### Rate limiter youtube video
+https://www.youtube.com/watch?v=mhUQe4BKZXs 
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ---
 
